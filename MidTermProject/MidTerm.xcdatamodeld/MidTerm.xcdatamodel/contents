@@ -13,15 +13,16 @@
     </entity>
     <entity name="Trip" representedClassName="Trip" syncable="YES">
         <attribute name="city" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="country" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="coverImage" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="dates" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="endDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="totalDays" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <relationship name="moments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Moment" inverseName="trip" inverseEntity="Moment" syncable="YES"/>
+        <relationship name="moments" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Moment" inverseName="trip" inverseEntity="Moment" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Trip" positionX="-92" positionY="-36" width="128" height="148"/>
+        <element name="Trip" positionX="-92" positionY="-36" width="128" height="163"/>
         <element name="Moment" positionX="124" positionY="-6" width="128" height="118"/>
         <element name="Tag" positionX="315" positionY="26" width="128" height="73"/>
     </elements>

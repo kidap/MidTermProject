@@ -10,6 +10,7 @@
 #import "CoreDataHandler.h"
 #import "MomentCollectionViewCell.h"
 #import "Trip.h"
+#import "Tag.h"
 #import "Moment.h"
 
 @interface MomentMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource>
@@ -25,11 +26,25 @@
 }
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
-  NSSet *moments = self.trip.moments;
-  self.sourceArray = [moments allObjects];
+  
+  //if selected using a trip, get moments related to trip
+  //else, tag was used to get all moments
+  if (self.trip){
+    NSSet *moments = self.trip.moments;
+    
+    //Filter based on day selected
+    if (self.day != 0){
+      NSString *fieldName = @"day";
+      NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %i",fieldName,self.day];
+      self.sourceArray = [[moments allObjects] filteredArrayUsingPredicate:predicate];
+    } else{
+      self.sourceArray = [moments allObjects];
+    }
+  } else {
+    self.sourceArray = self.moments;
+  }
   
   self.collectionView.backgroundColor = [UIColor whiteColor];
-  
   self.navigationController.navigationItem.title = [NSString stringWithFormat:@"Day %d",self.day];
 }
 -(void)prepareDelegate{
@@ -40,8 +55,9 @@
   return self.sourceArray.count;
 }
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
-  MomentCollectionViewCell *momentCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"tripCell" forIndexPath:indexPath];
-  
+  MomentCollectionViewCell *momentCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"momentCell" forIndexPath:indexPath];
+  momentCell.imageView.image = [UIImage imageWithData:self.sourceArray[indexPath.row].image];
+  momentCell.notes.text = self.sourceArray[indexPath.row].notes;
   return momentCell;
 }
 @end

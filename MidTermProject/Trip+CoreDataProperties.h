@@ -2,7 +2,7 @@
 //  Trip+CoreDataProperties.h
 //  MidTermProject
 //
-//  Created by Karlo Pagtakhan on 04/04/2016.
+//  Created by Karlo Pagtakhan on 04/05/2016.
 //  Copyright © 2016 AccessIT. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
@@ -17,20 +17,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nullable, nonatomic, retain) NSString *city;
 @property (nullable, nonatomic, retain) NSString *dates;
-@property (nonatomic) NSTimeInterval startDate;
-@property (nonatomic) NSTimeInterval endDate;
-@property (nonatomic) int32_t totalDays;
+@property (nullable, nonatomic, retain) NSDate *startDate;
+@property (nullable, nonatomic, retain) NSDate *endDate;
+@property (nullable, nonatomic, retain) NSNumber *totalDays;
 @property (nullable, nonatomic, retain) NSData *coverImage;
-@property (nullable, nonatomic, retain) NSSet<NSManagedObject *> *moments;
+@property (nullable, nonatomic, retain) NSString *country;
+@property (nullable, nonatomic, retain) NSSet<Moment *> *moments;
 
 @end
 
 @interface Trip (CoreDataGeneratedAccessors)
 
-- (void)addMomentsObject:(NSManagedObject *)value;
-- (void)removeMomentsObject:(NSManagedObject *)value;
-- (void)addMoments:(NSSet<NSManagedObject *> *)values;
-- (void)removeMoments:(NSSet<NSManagedObject *> *)values;
+- (void)addMomentsObject:(Moment *)value;
+- (void)removeMomentsObject:(Moment *)value;
+- (void)addMoments:(NSSet<Moment *> *)values;
+- (void)removeMoments:(NSSet<Moment *> *)values;
 
 @end
 

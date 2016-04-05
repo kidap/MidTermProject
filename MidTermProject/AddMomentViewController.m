@@ -12,8 +12,12 @@
 #import "Moment.h"
 #import "Tag.h"
 #import "Trip.h"
+@import MobileCoreServices;
+@import AssetsLibrary;
 
-@interface AddMomentViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource>
+static bool askWatson = NO;
+
+@interface AddMomentViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UITextView *notesTextView;
 @property (strong, nonatomic) NSSet<NSString *> *tags;
@@ -22,6 +26,7 @@
 @property (strong, nonatomic) UIActivityIndicatorView *activityIndicatorView;
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) NSMutableArray<NSString *> *sourceArray;
+@property (strong, nonatomic) NSDate *photoTakenDate;
 @end
 
 @implementation AddMomentViewController
@@ -33,17 +38,29 @@
 }
 -(void)viewDidAppear:(BOOL)animated{
   if (self.imageView.image == nil){
-    //[self displayImagePicker];
+    [self displayImagePicker];
   }
 }
+//MARK: Preparation
 -(void)prepareView{
   self.sourceArray = [[NSMutableArray alloc] init];
   [self.sourceArray addObject:@""];
   self.tableView.allowsMultipleSelection = YES;
+  
+  self.notesTextView.layer.borderWidth  = 0.5;
+  self.notesTextView.layer.borderColor  = [UIColor lightGrayColor].CGColor;
+  self.notesTextView.layer.cornerRadius  = 5.0;
+  [self.notesTextView setTextColor:[UIColor lightGrayColor]];
+  
+  //Tap image to uploade image
+  [self.imageView setUserInteractionEnabled:YES];
+  UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayImagePicker)];
+  [self.imageView addGestureRecognizer:imageTapGesture];
 }
 -(void)prepareDelegates{
   self.tableView.delegate = self;
   self.tableView.dataSource = self;
+  self.notesTextView.delegate = self;
 }
 
 //MARK: TableView delegate, datasource
@@ -57,7 +74,6 @@
     cell.textLabel.text = self.sourceArray[indexPath.row];
   } else{
     cell = [tableView dequeueReusableCellWithIdentifier:@"addCell" forIndexPath:indexPath];
-    //cell.textLabel.text = self.sourceArray[indexPath.row];
   }
   return cell;
 }
@@ -81,22 +97,30 @@
 //MARK:Actions
 - (IBAction)saveMoment:(id)sender {
   
-  Trip *trip = [[[CoreDataHandler sharedInstance] getAllTrips] firstObject];
-  NSMutableSet *tags = [[NSMutableSet alloc] init];
-  
-  //Get all selected rows and create(retrieve is there is already an existing) a tag
-  for (NSIndexPath *indexPath in self.tableView.indexPathsForSelectedRows){
-    Tag *tag = [[CoreDataHandler sharedInstance] createTagWithName:self.sourceArray[indexPath.row]];
-    [tags addObject:tag];
+  //  Trip *trip = [[[CoreDataHandler sharedInstance] getAllTrips] firstObject];
+  Trip *trip = [[CoreDataHandler sharedInstance] getTripWithDate:self.photoTakenDate];
+  NSLog(@"Saving to Country:%@, City:%@",trip.country,trip.city);
+  if (trip){
+    NSMutableSet *tags = [[NSMutableSet alloc] init];
+    
+    //Get all selected rows and create(retrieve is there is already an existing) a tag
+    for (NSIndexPath *indexPath in self.tableView.indexPathsForSelectedRows){
+      Tag *tag = [[CoreDataHandler sharedInstance] createTagWithName:self.sourceArray[indexPath.row]];
+      [tags addObject:tag];
+    }
+    
+    //Save moment with tag and trip
+    [[CoreDataHandler sharedInstance] createMomentWithImage:self.imageView.image
+                                                      notes:self.notesTextView.text
+                                          datePhotoWasTaken:self.photoTakenDate
+                                                       trip:trip
+                                                       tags:tags];
+  } else {
+    NSLog(@"Trip was not determined");
   }
-  
-  //Save moment with tag and trip
-  [[CoreDataHandler sharedInstance] createMomentWithImage:self.imageView.image
-                                                    notes:self.notesTextView.text
-                                                      day:[self getDay]
-                                                     trip:trip
-                                                     tags:tags];
-  
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
+- (IBAction)cancelButtonTapped:(id)sender {
   [self dismissViewControllerAnimated:YES completion:nil];
 }
 - (IBAction)addTagTapped:(id)sender {
@@ -123,22 +147,38 @@
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
   [self.imageView setImage: info[@"UIImagePickerControllerOriginalImage"]];
   
+  //Display spinner while Watson is thinking
   self.activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   [self.activityIndicatorView startAnimating];
   self.activityIndicatorView.center = self.tagsViewWrapper.center;
   NSLog(@"%@", NSStringFromCGPoint(self.activityIndicatorView.center));
   [self.tagsView addSubview:self.activityIndicatorView];
   
-  [[WatsonVisualRecognition sharedInstance] getTagUsingWatson:self.imageView.image completionHandler:^(bool result, NSSet * tags) {
-    NSLog(@"received reply");
-    NSString *tag = [tags anyObject];
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self addTagWithName:tag];
-      [self.activityIndicatorView stopAnimating];
-    });
-    
-  }];
+  //Ask Watson what is in the image
+  if (askWatson){
+    [[WatsonVisualRecognition sharedInstance] getTagUsingWatson:self.imageView.image completionHandler:^(bool result, NSSet * tags) {
+      NSLog(@"received reply");
+      NSString *tag = [tags anyObject];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self addTagWithName:tag];
+        [self.activityIndicatorView stopAnimating];
+      });
+      
+    }];
+  }
   
+  //Get the date whent the photo was taken
+  NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+  if(CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo){
+    ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
+    
+    [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
+      //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
+      self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+    } failureBlock:^(NSError *error) {
+      NSLog(@"error: %@", error);
+    }];
+  }
   
   [picker dismissViewControllerAnimated:YES completion:nil];
 }
@@ -149,13 +189,12 @@
 
 //MARK: Helper methods
 -(void)addTagWithName:(NSString *)name{
-  //  NSIndexPath *lastIndex = [NSIndexPath indexPathForRow:self.sourceArray.count-1 inSection:0];
   [self.sourceArray insertObject:name atIndex:self.sourceArray.count-1];
-  //  [self.tableView insertRowsAtIndexPaths:@[lastIndex] withRowAnimation:UITableViewRowAnimationTop];
   [self.tableView reloadData];
 }
 
--(int)getDay{
+-(int)getDayFromImage:(UIImage *)image trip:(Trip *)trip{
+  
   return 1;
 }
 -(void)displayImagePicker{
@@ -194,24 +233,9 @@
   //Display alert controller
   [self presentViewController:actionSheet animated:YES completion:nil];
 }
-//-(void)addButtonTagWithName:(NSString *)name{
-//  UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-//
-//  [button addTarget:self
-//             action:@selector(buttonPressed:)
-//   forControlEvents:UIControlEventTouchUpInside];
-//  [button setTitle:name forState:UIControlStateNormal];
-//
-//  CGSize buttonSize = [button intrinsicContentSize];
-//
-//  button.frame = CGRectMake(0, 0, buttonSize.width, buttonSize.height);
-//
-//  [self.tagsView addSubview:button];
-//  [self.tagsView layoutIfNeeded];
-//}
-////MARK: Actions
-//-(void)buttonPressed:(UIButton *)button{
-//  NSLog(@"Button pressed");
-//}
-
+//MARK: TextField/TextView delegate
+-(void)textViewDidBeginEditing:(UITextView *)textView{
+  textView.text = @"";
+  [textView setTextColor:[UIColor blackColor]];
+}
 @end

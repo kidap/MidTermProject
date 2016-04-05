@@ -24,18 +24,34 @@
 
 +(instancetype)sharedInstance;
 
+//Get
 -(NSArray *)getAllTrips;
 -(NSArray *)getAllTags;
+-(Tag *)getTagWithName:(NSString *)tagName;
+-(NSArray *)getMomentsWithTagName:(NSString *)tagName;
+-(NSArray *)getMomentsWithTag:(Tag *)tag;
+-(Trip *)getTripWithDate:(NSDate *)date;
+//Create
 -(void)createTripWithCity:(NSString*)city
+                  country:(NSString*)country
                     dates:(NSString *)dates
                 startDate:(NSDate*)startDate
                   endDate:(NSDate*)endDate
-                totalDays:(int)days
                     image:(UIImage *)image;
 -(void)createMomentWithImage:(UIImage*)image
                        notes:(NSString *)notes
-                         day:(int)day
+           datePhotoWasTaken:(NSDate *)date
                         trip:(Trip *)trip
                         tags:(NSSet<Tag *>*)tags;
 -(Tag *)createTagWithName:(NSString *)tagName;
+//Update
+-(void)updateTrip:(Trip *)trip
+             city:(NSString*)city
+          country:(NSString*)country
+            dates:(NSString *)dates
+        startDate:(NSDate*)startDate
+          endDate:(NSDate*)endDate
+            image:(UIImage *)image;
+//Delete
+-(void)deleteTrip:(Trip *)trip;
 @end

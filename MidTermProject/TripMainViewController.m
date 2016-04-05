@@ -10,13 +10,16 @@
 #import "TripCollectionViewCell.h"
 #import "CoreDataHandler.h"
 #import "Trip.h"
+#import "Moment.h"
 #import "TripDetailViewController.h"
+#import "MomentMainViewController.h"
 @import CoreData;
 
 
 @interface TripMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource>
-@property (strong, nonatomic) IBOutlet UICollectionView *collectionView;
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (strong, nonatomic) NSArray<Trip *> *sourceArray;
+@property (strong, nonatomic) NSArray<Moment *> *momentsArray;
 @end
 
 @implementation TripMainViewController
@@ -25,21 +28,26 @@
   [self prepareView];
   [self prepareDelegate];
 }
+-(void)viewDidAppear:(BOOL)animated{
+  self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
+  [self.collectionView reloadData];
+}
+//MARK: Preparation
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
   self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
   
-  self.collectionView.backgroundColor = [UIColor whiteColor];
+  //self.collectionView.backgroundColor = [UIColor whiteColor];
   
   //Create test data
   
   if (self.sourceArray.count == 0){
     [[CoreDataHandler sharedInstance] createTripWithCity:@"Toronto"
-                        dates:@"March 21-31"
-                    startDate:[NSDate date]
-                      endDate:[NSDate date]
-                    totalDays:10
-                        image:[UIImage imageNamed:@"Toronto"]];
+                                                 country:@"Canada"
+                                                   dates:@"March 21-31"
+                                               startDate:[NSDate date]
+                                                 endDate:[NSDate date]
+                                                   image:[UIImage imageNamed:@"Toronto"]];
     
   }
 }
@@ -47,27 +55,55 @@
   self.collectionView.delegate = self;
   self.collectionView.dataSource = self;
 }
+//MARK: Table view delegate
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
   return self.sourceArray.count;
 }
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
   TripCollectionViewCell *tripCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"tripCell" forIndexPath:indexPath];
-
+  
   tripCell.imageView.image = [UIImage imageWithData:self.sourceArray[indexPath.row].coverImage];
   tripCell.cityLabel.text  = self.sourceArray[indexPath.row].city;
-  if (self.sourceArray[indexPath.row].totalDays > 1){
-    tripCell.daysLabel.text  = [NSString stringWithFormat:@"%@ days", [@(self.sourceArray[indexPath.row].totalDays) stringValue] ];
+  if ([self.sourceArray[indexPath.row].totalDays intValue] > 1){
+    tripCell.daysLabel.text  = [NSString stringWithFormat:@"%@ days", [self.sourceArray[indexPath.row].totalDays stringValue] ];
   } else{
-    tripCell.daysLabel.text  = [NSString stringWithFormat:@"%@ day", [@(self.sourceArray[indexPath.row].totalDays) stringValue] ];
+    tripCell.daysLabel.text  = [NSString stringWithFormat:@"%@ day", [self.sourceArray[indexPath.row].totalDays stringValue] ];
   }
   tripCell.datesLabel.text  = self.sourceArray[indexPath.row].dates;
   
   return tripCell;
 }
+//MARK: Actions
+- (IBAction)searchMoments:(id)sender {
+  UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Search" message:@"Enter a tag to search" preferredStyle:UIAlertControllerStyleAlert];
+  //Add text field
+  [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+    //do nothing
+  }];
+  //Add ok button
+  [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    self.momentsArray = [[CoreDataHandler sharedInstance] getMomentsWithTagName:alertController.textFields[0].text];
+    if (self.momentsArray.count > 0){
+      [self performSegueWithIdentifier:@"showMoments" sender:self];
+    }
+  }]];
+  //Add cancel button
+  [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    //do nothing
+  }]];
+  
+  [self presentViewController:alertController animated:YES completion:nil];
+}
+
+//MARK: Navigation
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
   if ([segue.identifier isEqualToString:@"showTripMoments"]){
     TripDetailViewController *destinationVC = segue.destinationViewController;
     destinationVC.trip = self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item];
+  }  else if ([segue.identifier isEqualToString:@"showMoments"]){
+    MomentMainViewController *destinationVC = segue.destinationViewController;
+    destinationVC.moments = [self.momentsArray copy];
+    self.momentsArray = nil;
   }
 }
 @end

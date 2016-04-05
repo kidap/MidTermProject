@@ -2,7 +2,7 @@
 //  Moment+CoreDataProperties.h
 //  MidTermProject
 //
-//  Created by Karlo Pagtakhan on 04/04/2016.
+//  Created by Karlo Pagtakhan on 04/05/2016.
 //  Copyright © 2016 AccessIT. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nullable, nonatomic, retain) NSData *image;
 @property (nullable, nonatomic, retain) NSString *notes;
-@property (nonatomic) int32_t day;
+@property (nullable, nonatomic, retain) NSNumber *day;
 @property (nullable, nonatomic, retain) Trip *trip;
 @property (nullable, nonatomic, retain) NSSet<Tag *> *tags;
 

@@ -89,13 +89,13 @@
   NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
   
   return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-
+  
 }
 -(NSArray *)getAllTags{
-    NSError *error = nil;
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
+  NSError *error = nil;
+  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
   
-    return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+  return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
 }
 -(Tag *)getTagWithName:(NSString *)tagName{
   NSError *error= nil;
@@ -110,35 +110,50 @@
   return [tags firstObject];
   
 }
--(Tag *)getTripWithDate:(NSDate *)date{
+-(Trip *)getTripWithDate:(NSDate *)date{
   NSError *error= nil;
   NSString *fieldName1 = @"startDate";
   NSString *fieldName2 = @"endDate";
   NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
   
-  //Convert to time interval
-  NSDate *referenceDate = [NSDate dateWithTimeIntervalSince1970:0];
-  NSTimeInterval dateTimeInterval = [date timeIntervalSinceDate:referenceDate];
-  
-  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K <= %@) AND (%K == %@)",fieldName1,dateTimeInterval,fieldName2,dateTimeInterval];
+  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K <= %@) AND (%K >= %@)",fieldName1,date,fieldName2,date];
   fetchRequest.predicate = predicate;
   
-  NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+  NSLog(@"Looking for a trip on %@",date);
+  NSArray *trips = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
   
-  return [tags firstObject];
-  
+  return [trips firstObject];
 }
+-(NSArray *)getMomentsWithTagName:(NSString *)tagName{
+  NSError *error= nil;
+  NSString *fieldName = @"tagName";
+  //Get all tags
+  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
+  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",fieldName,tagName];
+  fetchRequest.predicate = predicate;
+  
+  //Get all memories using the tags
+  NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+  NSMutableArray *moments = [[NSMutableArray alloc] init];
+  for (Tag *tag in tags){
+    [moments addObjectsFromArray:[tag.moments allObjects]];
+  }
 
+  return moments;
+}
+-(NSArray *)getMomentsWithTag:(Tag *)tag{
+  return [tag.moments allObjects];
+}
 //MARK: (CREATE) Data methods
 -(Tag *)createTagWithName:(NSString *)tagName{
   //Check if the tag is already existing
-  Tag *tag = [self getTagWithName:tagName];
+  Tag *tag = [self getTagWithName:[[tagName lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""]];
   
   //If tag doesn't exist yet, create a new one
   if (tag == nil) {
     tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
                                         inManagedObjectContext:self.managedObjectContext];
-    tag.tagName = tagName;
+    tag.tagName = [[tagName lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""];
   }
   
   [self saveContext];
@@ -164,139 +179,98 @@
 }
 
 -(void)createTripWithCity:(NSString*)city
+                  country:(NSString*)country
                     dates:(NSString *)dates
                 startDate:(NSDate*)startDate
                   endDate:(NSDate*)endDate
-                totalDays:(int)days
                     image:(UIImage *)image {
   
   Trip *newTrip = [NSEntityDescription insertNewObjectForEntityForName:@"Trip"
                                                 inManagedObjectContext:self.managedObjectContext];
   
   newTrip.city = city;
+  newTrip.country = country;
   newTrip.dates = dates;
+  newTrip.startDate = startDate;
+  newTrip.endDate = endDate;
   
-  //Convert to time interval
-  NSDate *referenceDate = [NSDate dateWithTimeIntervalSince1970:0];
-  NSTimeInterval startTimeInterval = [startDate timeIntervalSinceDate:referenceDate];
-  NSTimeInterval endTimeInterval = [endDate timeIntervalSinceDate:referenceDate];
+  //Get total days of trip
+  NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
+                                                      fromDate:startDate
+                                                        toDate:endDate
+                                                       options:NSCalendarWrapComponents];
+  int daysOfTrip = (int)[components day] + 1;
   
-  newTrip.startDate = startTimeInterval;
-  newTrip.endDate = endTimeInterval;
-  
-  newTrip.totalDays = 5;
+  newTrip.totalDays = [NSNumber numberWithInteger:daysOfTrip];
   newTrip.coverImage = UIImageJPEGRepresentation(image, 1.0);
-  //    newTrip.city = @"";
   
   [self saveContext];
   
 }
 
 -(void)createMomentWithImage:(UIImage*)image
-                     notes:(NSString *)notes
-                         day:(int)day
+                       notes:(NSString *)notes
+           datePhotoWasTaken:(NSDate *)datePhotoTaken
                         trip:(Trip *)trip
                         tags:(NSSet<Tag *>*)tags{
   
   Moment *newMoment = [NSEntityDescription insertNewObjectForEntityForName:@"Moment"
-                                                inManagedObjectContext:self.managedObjectContext];
+                                                    inManagedObjectContext:self.managedObjectContext];
   
   newMoment.image = UIImageJPEGRepresentation(image, 1.0) ;
   newMoment.notes = notes;
-  newMoment.day = day;
+  
+  //Get total days of trip
+  NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
+                                                      fromDate:trip.startDate
+                                                        toDate:datePhotoTaken
+                                                       options:NSCalendarWrapComponents];
+  int day = (int)[components day] + 1;
+  NSLog(@"Save in day: %@",[@(day) stringValue]);
+  
+  newMoment.day = [NSNumber numberWithInteger:day];
   newMoment.tags = tags;
   newMoment.trip = trip;
   
-//  [self saveContext];
+  [self saveContext];
   
 }
 
+//MARK: (UPDATE) Data methods
+-(void)updateTrip:(Trip *)trip
+             city:(NSString*)city
+          country:(NSString*)country
+            dates:(NSString *)dates
+        startDate:(NSDate*)startDate
+          endDate:(NSDate*)endDate
+            image:(UIImage *)image {
+  
+  trip.city = city;
+  trip.country = country;
+  trip.dates = dates;
+  trip.startDate = startDate;
+  trip.endDate = endDate;
+  
+  //Get total days of trip
+  NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
+                                                      fromDate:startDate
+                                                        toDate:endDate
+                                                       options:NSCalendarWrapComponents];
+  int daysOfTrip = (int)[components day] + 1;
+  
+  trip.totalDays = [NSNumber numberWithInt:daysOfTrip];
+  trip.coverImage = UIImageJPEGRepresentation(image, 1.0);
+  
+  [self saveContext];
+  
+}
 
-//-(void)addReceiptWithAmount:(double)amount
-//                       note:(NSString *)note
-//                  timestamp:(NSString *)timestamp
-//                       tags:(NSSet<Tag *> *)tags{
-//  NSSet *tagsToBeAdded = [NSSet alloc];
-//  if (tagsToBeAdded == nil){
-//    tagsToBeAdded = [NSSet setWithObject:[[CoreDataHandler sharedInstance] createTagWithName:@"Test Tag" receipts:nil]];
-//  } else {
-//    tagsToBeAdded = [NSSet setWithSet:tags];
-//  }
-//  Receipt *newReceipt = [NSEntityDescription insertNewObjectForEntityForName:@"Receipt"
-//                                                      inManagedObjectContext:self.managedObjectContext];
-//  newReceipt.amount = amount;
-//  newReceipt.note = note;
-//  newReceipt.timestamp = timestamp;
-//  newReceipt.tag = tags;
-//
-//  [self saveContext];
-//
-//}
-//-(NSArray *)getAllReceipts{
-//  NSError *error = nil;
-//  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Receipt"];
-//
-//  return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-//}
-//-(NSArray *)getAllTags{
-//  NSError *error = nil;
-//  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
-//
-//  return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-//}
-//-(NSArray *)getReceiptsWithTag:(Tag *)tag{
-//  NSError *error = nil;
-//  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
-//
-//  return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-//}
-//-(Tag *)createTagWithName:(NSString *)tagName{
-//  //Check if the tag is already existing
-//  Tag *tag = [self getTagWithName:tagName];
-//
-//  //If tag doesn't exist yet, create a new one
-//  if (tag == nil) {
-//    tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
-//                                        inManagedObjectContext:self.managedObjectContext];
-//    tag.tagName = tagName;
-//  }
-//
-//  [self saveContext];
-//
-//  return tag;
-//}
-//-(Tag *)createTagWithName:(NSString *)tagName
-//                 receipts:(Receipt *)receipts{
-//  //Check if the tag is already existing
-//  Tag *tag = [self getTagWithName:tagName];
-//
-//  //If tag doesn't exist yet, create a new one
-//  if (tag == nil) {
-//    tag = [NSEntityDescription insertNewObjectForEntityForName:@"Tag"
-//                                                        inManagedObjectContext:self.managedObjectContext];
-//    tag.tagName = tagName;
-//    [tag.receipts setByAddingObject:receipts];
-//  }
-//
-//  [self saveContext];
-//
-//  return tag;
-//}
-//-(Tag *)getTagWithName:(NSString *)tagName{
-//  NSError *error= nil;
-//  NSString *fieldName = @"tagName";
-//  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
-//
-//  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",fieldName,tagName];
-//  fetchRequest.predicate = predicate;
-//
-//  NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-//
-//  return [tags firstObject];
-//
-//}
-//-(void)deleteReceipt:(Receipt *)receipt{
-//  [self.managedObjectContext deleteObject:receipt];
-//  [self saveContext];
-//}
+//MARK: (DELETE) Data methods
+-(void)deleteTrip:(Trip *)trip{
+  [self.managedObjectContext deleteObject:trip];
+  [self saveContext];
+}
 @end
