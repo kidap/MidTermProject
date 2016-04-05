@@ -23,14 +23,14 @@
 		A7C71C9D1CB313EB002821EE /* WatsonVisualRecognition.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71C9C1CB313EB002821EE /* WatsonVisualRecognition.m */; };
 		A7C71CA01CB331F8002821EE /* AddTripViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71C9F1CB331F8002821EE /* AddTripViewController.m */; };
 		A7C71CA31CB338A8002821EE /* MomentCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CA21CB338A8002821EE /* MomentCollectionViewCell.m */; };
-		A7C71CD61CB3735A002821EE /* Tag+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CCB1CB3735A002821EE /* Tag+CoreDataProperties.m */; };
-		A7C71CD71CB3735A002821EE /* Tag.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CCD1CB3735A002821EE /* Tag.m */; };
-		A7C71CD81CB3735A002821EE /* Trip+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CCF1CB3735A002821EE /* Trip+CoreDataProperties.m */; };
-		A7C71CD91CB3735A002821EE /* Trip.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CD11CB3735A002821EE /* Trip.m */; };
-		A7C71CDA1CB3735A002821EE /* Moment+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CD31CB3735A002821EE /* Moment+CoreDataProperties.m */; };
-		A7C71CDB1CB3735A002821EE /* Moment.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CD51CB3735A002821EE /* Moment.m */; };
 		A7C71CDE1CB431E1002821EE /* TagMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CDD1CB431E1002821EE /* TagMainViewController.m */; };
 		A7C71CE21CB4519A002821EE /* DayCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CE11CB4519A002821EE /* DayCollectionViewCell.m */; };
+		A7C71CEF1CB46B4D002821EE /* Tag+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CE41CB46B4D002821EE /* Tag+CoreDataProperties.m */; };
+		A7C71CF01CB46B4D002821EE /* Tag.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CE61CB46B4D002821EE /* Tag.m */; };
+		A7C71CF11CB46B4D002821EE /* Moment+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CE81CB46B4D002821EE /* Moment+CoreDataProperties.m */; };
+		A7C71CF21CB46B4D002821EE /* Moment.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CEA1CB46B4D002821EE /* Moment.m */; };
+		A7C71CF31CB46B4D002821EE /* Trip+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CEC1CB46B4D002821EE /* Trip+CoreDataProperties.m */; };
+		A7C71CF41CB46B4D002821EE /* Trip.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CEE1CB46B4D002821EE /* Trip.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,22 +62,22 @@
 		A7C71C9F1CB331F8002821EE /* AddTripViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddTripViewController.m; sourceTree = "<group>"; };
 		A7C71CA11CB338A8002821EE /* MomentCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MomentCollectionViewCell.h; sourceTree = "<group>"; };
 		A7C71CA21CB338A8002821EE /* MomentCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MomentCollectionViewCell.m; sourceTree = "<group>"; };
-		A7C71CCA1CB3735A002821EE /* Tag+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Tag+CoreDataProperties.h"; sourceTree = "<group>"; };
-		A7C71CCB1CB3735A002821EE /* Tag+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Tag+CoreDataProperties.m"; sourceTree = "<group>"; };
-		A7C71CCC1CB3735A002821EE /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
-		A7C71CCD1CB3735A002821EE /* Tag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tag.m; sourceTree = "<group>"; };
-		A7C71CCE1CB3735A002821EE /* Trip+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Trip+CoreDataProperties.h"; sourceTree = "<group>"; };
-		A7C71CCF1CB3735A002821EE /* Trip+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Trip+CoreDataProperties.m"; sourceTree = "<group>"; };
-		A7C71CD01CB3735A002821EE /* Trip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Trip.h; sourceTree = "<group>"; };
-		A7C71CD11CB3735A002821EE /* Trip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Trip.m; sourceTree = "<group>"; };
-		A7C71CD21CB3735A002821EE /* Moment+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Moment+CoreDataProperties.h"; sourceTree = "<group>"; };
-		A7C71CD31CB3735A002821EE /* Moment+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Moment+CoreDataProperties.m"; sourceTree = "<group>"; };
-		A7C71CD41CB3735A002821EE /* Moment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Moment.h; sourceTree = "<group>"; };
-		A7C71CD51CB3735A002821EE /* Moment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Moment.m; sourceTree = "<group>"; };
 		A7C71CDC1CB431E1002821EE /* TagMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagMainViewController.h; sourceTree = "<group>"; };
 		A7C71CDD1CB431E1002821EE /* TagMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagMainViewController.m; sourceTree = "<group>"; };
 		A7C71CE01CB4519A002821EE /* DayCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DayCollectionViewCell.h; sourceTree = "<group>"; };
 		A7C71CE11CB4519A002821EE /* DayCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DayCollectionViewCell.m; sourceTree = "<group>"; };
+		A7C71CE31CB46B4D002821EE /* Tag+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Tag+CoreDataProperties.h"; sourceTree = "<group>"; };
+		A7C71CE41CB46B4D002821EE /* Tag+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Tag+CoreDataProperties.m"; sourceTree = "<group>"; };
+		A7C71CE51CB46B4D002821EE /* Tag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tag.h; sourceTree = "<group>"; };
+		A7C71CE61CB46B4D002821EE /* Tag.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tag.m; sourceTree = "<group>"; };
+		A7C71CE71CB46B4D002821EE /* Moment+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Moment+CoreDataProperties.h"; sourceTree = "<group>"; };
+		A7C71CE81CB46B4D002821EE /* Moment+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Moment+CoreDataProperties.m"; sourceTree = "<group>"; };
+		A7C71CE91CB46B4D002821EE /* Moment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Moment.h; sourceTree = "<group>"; };
+		A7C71CEA1CB46B4D002821EE /* Moment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Moment.m; sourceTree = "<group>"; };
+		A7C71CEB1CB46B4D002821EE /* Trip+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Trip+CoreDataProperties.h"; sourceTree = "<group>"; };
+		A7C71CEC1CB46B4D002821EE /* Trip+CoreDataProperties.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "Trip+CoreDataProperties.m"; sourceTree = "<group>"; };
+		A7C71CED1CB46B4D002821EE /* Trip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Trip.h; sourceTree = "<group>"; };
+		A7C71CEE1CB46B4D002821EE /* Trip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Trip.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -183,18 +183,18 @@
 		A7C71C7D1CB2FB0B002821EE /* Subclass */ = {
 			isa = PBXGroup;
 			children = (
-				A7C71CCA1CB3735A002821EE /* Tag+CoreDataProperties.h */,
-				A7C71CCB1CB3735A002821EE /* Tag+CoreDataProperties.m */,
-				A7C71CCC1CB3735A002821EE /* Tag.h */,
-				A7C71CCD1CB3735A002821EE /* Tag.m */,
-				A7C71CCE1CB3735A002821EE /* Trip+CoreDataProperties.h */,
-				A7C71CCF1CB3735A002821EE /* Trip+CoreDataProperties.m */,
-				A7C71CD01CB3735A002821EE /* Trip.h */,
-				A7C71CD11CB3735A002821EE /* Trip.m */,
-				A7C71CD21CB3735A002821EE /* Moment+CoreDataProperties.h */,
-				A7C71CD31CB3735A002821EE /* Moment+CoreDataProperties.m */,
-				A7C71CD41CB3735A002821EE /* Moment.h */,
-				A7C71CD51CB3735A002821EE /* Moment.m */,
+				A7C71CE31CB46B4D002821EE /* Tag+CoreDataProperties.h */,
+				A7C71CE41CB46B4D002821EE /* Tag+CoreDataProperties.m */,
+				A7C71CE51CB46B4D002821EE /* Tag.h */,
+				A7C71CE61CB46B4D002821EE /* Tag.m */,
+				A7C71CE71CB46B4D002821EE /* Moment+CoreDataProperties.h */,
+				A7C71CE81CB46B4D002821EE /* Moment+CoreDataProperties.m */,
+				A7C71CE91CB46B4D002821EE /* Moment.h */,
+				A7C71CEA1CB46B4D002821EE /* Moment.m */,
+				A7C71CEB1CB46B4D002821EE /* Trip+CoreDataProperties.h */,
+				A7C71CEC1CB46B4D002821EE /* Trip+CoreDataProperties.m */,
+				A7C71CED1CB46B4D002821EE /* Trip.h */,
+				A7C71CEE1CB46B4D002821EE /* Trip.m */,
 			);
 			name = Subclass;
 			sourceTree = "<group>";
@@ -309,23 +309,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A7C71CD91CB3735A002821EE /* Trip.m in Sources */,
+				A7C71CF41CB46B4D002821EE /* Trip.m in Sources */,
 				A7C71C991CB30DE1002821EE /* AddMomentViewController.m in Sources */,
 				A7C71C651CB2F29B002821EE /* CoreDataHandler.m in Sources */,
-				A7C71CD81CB3735A002821EE /* Trip+CoreDataProperties.m in Sources */,
 				A7C71C9D1CB313EB002821EE /* WatsonVisualRecognition.m in Sources */,
-				A7C71CDB1CB3735A002821EE /* Moment.m in Sources */,
-				A7C71CD61CB3735A002821EE /* Tag+CoreDataProperties.m in Sources */,
 				A7C71CE21CB4519A002821EE /* DayCollectionViewCell.m in Sources */,
 				A7C71CA01CB331F8002821EE /* AddTripViewController.m in Sources */,
+				A7C71CF21CB46B4D002821EE /* Moment.m in Sources */,
+				A7C71CF31CB46B4D002821EE /* Trip+CoreDataProperties.m in Sources */,
 				A7C71C4F1CB2F1D3002821EE /* AppDelegate.m in Sources */,
+				A7C71CEF1CB46B4D002821EE /* Tag+CoreDataProperties.m in Sources */,
 				A7C71C771CB2F7DD002821EE /* TripDetailViewController.m in Sources */,
 				A7C71CDE1CB431E1002821EE /* TagMainViewController.m in Sources */,
 				A7C71C741CB2F7CC002821EE /* TripMainViewController.m in Sources */,
-				A7C71CDA1CB3735A002821EE /* Moment+CoreDataProperties.m in Sources */,
+				A7C71CF11CB46B4D002821EE /* Moment+CoreDataProperties.m in Sources */,
 				A7C71C6B1CB2F350002821EE /* MidTerm.xcdatamodeld in Sources */,
 				A7C71C4C1CB2F1D3002821EE /* main.m in Sources */,
-				A7C71CD71CB3735A002821EE /* Tag.m in Sources */,
+				A7C71CF01CB46B4D002821EE /* Tag.m in Sources */,
 				A7C71CA31CB338A8002821EE /* MomentCollectionViewCell.m in Sources */,
 				A7C71C7C1CB2F85E002821EE /* MomentMainViewController.m in Sources */,
 				A7C71C961CB303D6002821EE /* TripCollectionViewCell.m in Sources */,

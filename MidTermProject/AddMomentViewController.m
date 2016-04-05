@@ -20,13 +20,15 @@ static bool askWatson = NO;
 @interface AddMomentViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UITextView *notesTextView;
-@property (strong, nonatomic) NSSet<NSString *> *tags;
-@property (strong, nonatomic) IBOutlet UIView *tagsViewWrapper;
-@property (strong, nonatomic) IBOutlet UIStackView *tagsView;
-@property (strong, nonatomic) UIActivityIndicatorView *activityIndicatorView;
-@property (strong, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIView *tagsViewWrapper;
+@property (weak, nonatomic) IBOutlet UIStackView *tagsView;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (strong, nonatomic) NSMutableArray<NSString *> *sourceArray;
 @property (strong, nonatomic) NSDate *photoTakenDate;
+@property (strong, nonatomic) NSSet<NSString *> *tags;
+@property (strong, nonatomic) UIActivityIndicatorView *activityIndicatorView;
+@property (assign, nonatomic) bool editMode;
 @end
 
 @implementation AddMomentViewController
@@ -56,13 +58,41 @@ static bool askWatson = NO;
   [self.imageView setUserInteractionEnabled:YES];
   UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayImagePicker)];
   [self.imageView addGestureRecognizer:imageTapGesture];
+  
+  //Notifications - Keyboard
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardShow:) name:UIKeyboardDidShowNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardHide:) name:UIKeyboardDidHideNotification object:nil];
+  
+  //Tap view to dismiss keyboard
+  [self.scrollView setUserInteractionEnabled:YES];
+  UITapGestureRecognizer *viewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKB)];
+  [self.scrollView addGestureRecognizer:viewTapGesture];
+  self.scrollView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
+
+  if (self.moment){
+//    //Set up view
+    self.editMode = YES;
+//    self.imageView.alpha = 1;
+//    self.deleteButton.alpha = 1;
+//    self.saveButton.hidden = YES;
+    
+    //Add save button navigation bar
+    UIBarButtonItem *save = [[UIBarButtonItem alloc] initWithTitle:@"Save" style:UIBarButtonItemStylePlain target:self action:@selector(saveMoment:)];
+    self.navigationItem.rightBarButtonItem = save;
+    
+    //Populates fields
+    [self populateElementsFromMoment];
+  }
 }
 -(void)prepareDelegates{
   self.tableView.delegate = self;
   self.tableView.dataSource = self;
   self.notesTextView.delegate = self;
 }
-
+-(void)populateElementsFromMoment{
+  self.imageView.image = [UIImage imageWithData:self.moment.image];
+  self.notesTextView.text = self.moment.notes;
+}
 //MARK: TableView delegate, datasource
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
   return self.sourceArray.count;
@@ -100,6 +130,7 @@ static bool askWatson = NO;
   //  Trip *trip = [[[CoreDataHandler sharedInstance] getAllTrips] firstObject];
   Trip *trip = [[CoreDataHandler sharedInstance] getTripWithDate:self.photoTakenDate];
   NSLog(@"Saving to Country:%@, City:%@",trip.country,trip.city);
+  
   if (trip){
     NSMutableSet *tags = [[NSMutableSet alloc] init];
     
@@ -115,10 +146,20 @@ static bool askWatson = NO;
                                           datePhotoWasTaken:self.photoTakenDate
                                                        trip:trip
                                                        tags:tags];
+    
+    NSString *messageString = [NSString stringWithFormat:@"Moment saved in your trip to %@ (%@)",trip.city,trip.dates];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Moment saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
+    
+    //Add ok button
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+      [self dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    [self presentViewController:alertController animated:YES completion:nil];
+    
   } else {
     NSLog(@"Trip was not determined");
+    [self dismissViewControllerAnimated:YES completion:nil];
   }
-  [self dismissViewControllerAnimated:YES completion:nil];
 }
 - (IBAction)cancelButtonTapped:(id)sender {
   [self dismissViewControllerAnimated:YES completion:nil];
@@ -142,10 +183,15 @@ static bool askWatson = NO;
   [self presentViewController:alertController animated:YES completion:nil];
 }
 
+-(void)dismissKB{
+  [self.notesTextView resignFirstResponder];
+  NSLog(@"Scroll view tapped");
+}
 
 //MARK: Image Picker delegate
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
   [self.imageView setImage: info[@"UIImagePickerControllerOriginalImage"]];
+  self.imageView.alpha = 1;
   
   //Display spinner while Watson is thinking
   self.activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
@@ -163,7 +209,6 @@ static bool askWatson = NO;
         [self addTagWithName:tag];
         [self.activityIndicatorView stopAnimating];
       });
-      
     }];
   }
   
@@ -182,7 +227,6 @@ static bool askWatson = NO;
   
   [picker dismissViewControllerAnimated:YES completion:nil];
 }
-
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
   [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -237,5 +281,23 @@ static bool askWatson = NO;
 -(void)textViewDidBeginEditing:(UITextView *)textView{
   textView.text = @"";
   [textView setTextColor:[UIColor blackColor]];
+}
+//MARK: Handle keyboard
+-(void)keyboardShow:(NSNotification *)notification{
+  NSValue *value = notification.userInfo[UIKeyboardFrameBeginUserInfoKey];
+  CGFloat keyboardHeight = CGRectGetHeight([value CGRectValue]);
+  
+  CGPoint offset = CGPointMake(0, (keyboardHeight/2)+30);
+  NSLog(@"%f",keyboardHeight);
+  [self.scrollView setContentOffset:offset animated:YES];
+}
+
+-(void)keyboardHide:(NSNotification *)notification{
+  NSValue *value = notification.userInfo[UIKeyboardFrameBeginUserInfoKey];
+  CGFloat keyboardHeight = CGRectGetHeight([value CGRectValue]);
+  
+  CGPoint offset = CGPointMake(0, 0);
+  NSLog(@"%f",keyboardHeight);
+  [self.scrollView setContentOffset:offset animated:YES];
 }
 @end

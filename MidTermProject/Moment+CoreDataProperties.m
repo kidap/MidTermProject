@@ -16,6 +16,7 @@
 @dynamic image;
 @dynamic notes;
 @dynamic day;
+@dynamic date;
 @dynamic trip;
 @dynamic tags;
 

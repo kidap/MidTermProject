@@ -9,16 +9,19 @@
 #import "AddTripViewController.h"
 #import "CoreDataHandler.h"
 #import "Trip.h"
+@import MobileCoreServices;
+@import AssetsLibrary;
 
-@interface AddTripViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
+@interface AddTripViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITextFieldDelegate>
 @property (weak, nonatomic) IBOutlet UITextField *countryTextField;
 @property (weak, nonatomic) IBOutlet UITextField *cityTextField;
 @property (weak, nonatomic) IBOutlet UITextField *startDateTextField;
 @property (weak, nonatomic) IBOutlet UITextField *endDateTextField;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
-@property (assign, nonatomic) bool editMode;
 @property (weak, nonatomic) IBOutlet UIButton *saveButton;
-@property (strong, nonatomic) IBOutlet UIButton *deleteButton;
+@property (weak, nonatomic) IBOutlet UIButton *deleteButton;
+@property (strong, nonatomic) NSDate *photoTakenDate;
+@property (assign, nonatomic) bool editMode;
 
 @end
 
@@ -28,6 +31,7 @@
   [super viewDidLoad];
   // Do any additional setup after loading the view.
   [self prepareView];
+  [self prepareDelegates];
 }
 -(void)prepareView{
   //  self.cancelButton.layer.borderWidth  = 0.5;
@@ -69,6 +73,12 @@
     
   }
 }
+-(void)prepareDelegates{
+  self.countryTextField.delegate = self;
+  self.cityTextField.delegate = self;
+  self.startDateTextField.delegate = self;
+  self.endDateTextField.delegate = self;
+}
 -(void)populateElementsFromTrip{
   
   self.countryTextField.text = self.trip.country;
@@ -88,6 +98,22 @@
 //MARK: Image Picker delegate
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
   [self.imageView setImage: info[@"UIImagePickerControllerOriginalImage"]];
+  
+  //Get the date whent the photo was taken
+  NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+  if(CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo){
+    ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
+    
+    [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
+      //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
+      self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+      [self setStartDate:self.photoTakenDate];
+      [self setEndDate:self.photoTakenDate];
+    } failureBlock:^(NSError *error) {
+      NSLog(@"error: %@", error);
+    }];
+  }
+  
   [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -147,7 +173,6 @@
     
     //Add cancel button
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-      //[self dismissViewControllerAnimated:YES completion:nil];
     }]];
     
     [self presentViewController:alertController animated:YES completion:nil];
@@ -155,6 +180,20 @@
 }
 
 //MARK: Helper methods
+-(void)setStartDate:(NSDate *)date{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:@"MM/dd/yyyy"];
+  NSString *dateString = [f stringFromDate:date];
+  
+  self.startDateTextField.text = dateString;
+}
+-(void)setEndDate:(NSDate *)date{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:@"MM/dd/yyyy"];
+  NSString *dateString = [f stringFromDate:date];
+  
+  self.endDateTextField.text = dateString;
+}
 -(void)displayImagePicker{
   UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
   imagePicker.delegate = self;
@@ -191,5 +230,9 @@
   //Display alert controller
   [self presentViewController:actionSheet animated:YES completion:nil];
 }
-
+//MARK: TextField delegate
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+  [textField resignFirstResponder];
+  return YES;
+}
 @end

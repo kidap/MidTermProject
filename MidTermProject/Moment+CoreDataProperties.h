@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, retain) NSData *image;
 @property (nullable, nonatomic, retain) NSString *notes;
 @property (nullable, nonatomic, retain) NSNumber *day;
+@property (nullable, nonatomic, retain) NSDate *date;
 @property (nullable, nonatomic, retain) Trip *trip;
 @property (nullable, nonatomic, retain) NSSet<Tag *> *tags;
 

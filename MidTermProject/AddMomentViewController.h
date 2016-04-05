@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+@class Moment;
 
 @interface AddMomentViewController : UIViewController
-
+@property (strong, nonatomic) Moment *moment;
 @end

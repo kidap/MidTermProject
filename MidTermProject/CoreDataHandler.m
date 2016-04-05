@@ -220,6 +220,7 @@
   
   newMoment.image = UIImageJPEGRepresentation(image, 1.0) ;
   newMoment.notes = notes;
+  newMoment.date = datePhotoTaken;
   
   //Get total days of trip
   NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];

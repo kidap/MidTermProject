@@ -12,6 +12,7 @@
 #import "Trip.h"
 #import "Tag.h"
 #import "Moment.h"
+#import "AddMomentViewController.h"
 
 @interface MomentMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource>
 @property (strong, nonatomic) IBOutlet UICollectionView *collectionView;
@@ -44,6 +45,11 @@
     self.sourceArray = self.moments;
   }
   
+  //Sort by date
+  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO];
+  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
+  
+  
   self.collectionView.backgroundColor = [UIColor whiteColor];
   self.navigationController.navigationItem.title = [NSString stringWithFormat:@"Day %d",self.day];
 }
@@ -59,5 +65,12 @@
   momentCell.imageView.image = [UIImage imageWithData:self.sourceArray[indexPath.row].image];
   momentCell.notes.text = self.sourceArray[indexPath.row].notes;
   return momentCell;
+}
+//MARK: Navigation
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+  if ([segue.identifier isEqualToString:@"showEditMoment"]){
+    AddMomentViewController *destinationVC = segue.destinationViewController;
+    destinationVC.moment = self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item];
+  }
 }
 @end

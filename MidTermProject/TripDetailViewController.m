@@ -64,10 +64,10 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
   DayCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"dayCell" forIndexPath:indexPath];
   
+  //Day text
    cell.dayLabel.text= self.sourceArray[indexPath.row];
-  
-  
-  //Filter based on day selected
+
+  //Image - Filter based on day selected
   int currentDay = (int)indexPath.row;
   NSSet <Moment *>*moments = self.trip.moments;
   if (currentDay != 0){
@@ -76,7 +76,6 @@
     Moment *moment = [[[moments allObjects] filteredArrayUsingPredicate:predicate] lastObject];
     cell.imageView.image = [UIImage imageWithData:moment.image];
   } else{
-//    Moment *moment = [[[moments allObjects] filteredArrayUsingPredicate:predicate] lastObject];
     cell.imageView.image = [UIImage imageWithData: [moments anyObject].image];
   }
   
@@ -91,8 +90,10 @@
   if ([segue.identifier isEqualToString:@"showMoments"]){
     MomentMainViewController *destinationVC = segue.destinationViewController;
     destinationVC.trip = self.trip;
-    destinationVC.day = (int)self.dayTableView.indexPathForSelectedRow.row;
-    NSLog(@"Day selected:%ld",self.dayTableView.indexPathForSelectedRow.row);
+//    destinationVC.day = (int)self.dayTableView.indexPathForSelectedRow.row;
+//    NSLog(@"Day selected:%ld",self.dayTableView.indexPathForSelectedRow.row);
+    destinationVC.day = (int)[self.dayCollectionView.indexPathsForSelectedItems firstObject].item;
+    NSLog(@"Day selected:%ld",[self.dayCollectionView.indexPathsForSelectedItems firstObject].item);
   } else if ([segue.identifier isEqualToString:@"showEditTrip"]){
     AddTripViewController *destinationVC = segue.destinationViewController;
     destinationVC.trip = self.trip;

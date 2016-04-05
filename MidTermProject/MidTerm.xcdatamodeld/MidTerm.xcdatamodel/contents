@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="10171" systemVersion="15E65" minimumToolsVersion="Xcode 7.0">
     <entity name="Moment" representedClassName="Moment" syncable="YES">
+        <attribute name="date" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="day" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="image" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="notes" optional="YES" attributeType="String" syncable="YES"/>
@@ -23,7 +24,7 @@
     </entity>
     <elements>
         <element name="Trip" positionX="-92" positionY="-36" width="128" height="163"/>
-        <element name="Moment" positionX="124" positionY="-6" width="128" height="118"/>
+        <element name="Moment" positionX="124" positionY="-6" width="128" height="133"/>
         <element name="Tag" positionX="315" positionY="26" width="128" height="73"/>
     </elements>
 </model>
