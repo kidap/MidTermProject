@@ -26,7 +26,7 @@ static NSString *password = @"DS2cavB6d4MW";
 -(void)getTagUsingWatson:(UIImage*)image completionHandler:(void (^)(bool,NSSet *))completionHandler{
   NSMutableSet *returnSet = [[NSMutableSet alloc] init];
   
-  NSString *imageFileName = @"test.jpg";
+  //  NSString *imageFileName = @"test.jpg";
   NSString *urlString = @"https://gateway.watsonplatform.net/visual-recognition-beta/api/v2/classify?version=2015-12-02";
   
   NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlString]];
@@ -44,7 +44,7 @@ static NSString *password = @"DS2cavB6d4MW";
   
   NSLog(@"authDetails: %@",authDetails);
   NSLog(@"authorizationToken: %@",authorizationToken);
-
+  
   // the boundary string : a random string, that will not repeat in post data, to separate post data fields.
   NSString *BoundaryConstant = @"----------V2ymHFg03ehbqgZCaKO6jy";
   
@@ -55,13 +55,13 @@ static NSString *password = @"DS2cavB6d4MW";
   
   // post body
   NSMutableData *body = [NSMutableData data];
-
+  
   // add image data
   UIImage *imageToPost = image;
   NSData *imageData = UIImageJPEGRepresentation(imageToPost, 1.0);
   if (imageData) {
     [body appendData:[[NSString stringWithFormat:@"--%@\r\n", BoundaryConstant] dataUsingEncoding:NSUTF8StringEncoding]];
-    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"name\"; filename=\"basketball.jpg\"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+    [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"name\"; filename=\"test.jpg\"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[@"Content-Type: image/jpeg\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:imageData];
     [body appendData:[[NSString stringWithFormat:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -73,18 +73,17 @@ static NSString *password = @"DS2cavB6d4MW";
   [request setHTTPBody:body];
   
   // set the content-length
-  NSString *postLength = [NSString stringWithFormat:@"%d", [body length]];
+  NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[body length]];
   [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
   
   NSURLSession *session = [NSURLSession sharedSession];
   NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-
-      NSLog(@"Error: %@",error);
-      NSLog(@"Data: %@",data);
-      NSLog(@"Response: %@",response);
-      
+    
+//    NSLog(@"Data: %@",data);
+//    NSLog(@"Response: %@",response);
+    if (error == nil){
       NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-      NSLog(@"DataJSON: %@",responseDictionary);
+      //NSLog(@"DataJSON: %@",responseDictionary);
       
       NSArray *images = responseDictionary[@"images"];
       NSDictionary *image = [images firstObject];
@@ -95,10 +94,14 @@ static NSString *password = @"DS2cavB6d4MW";
         NSLog(@"%@",score[@"score"]);
         [returnSet addObject:score[@"name"]];
       }
-    completionHandler(YES,returnSet);
+      completionHandler(YES,returnSet);
+    } else{
+      NSLog(@"Error: %@",error);
+    }
   }];
   
   [task resume];
+  NSLog(@"Connecting to Watson...");
   
 }
 

@@ -14,7 +14,7 @@
 @import CoreData;
 
 
-@interface TripMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource, NSFetchedResultsControllerDelegate>
+@interface TripMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource>
 @property (strong, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (strong, nonatomic) NSArray<Trip *> *sourceArray;
 @end

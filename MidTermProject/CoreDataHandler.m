@@ -110,6 +110,24 @@
   return [tags firstObject];
   
 }
+-(Tag *)getTripWithDate:(NSDate *)date{
+  NSError *error= nil;
+  NSString *fieldName1 = @"startDate";
+  NSString *fieldName2 = @"endDate";
+  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
+  
+  //Convert to time interval
+  NSDate *referenceDate = [NSDate dateWithTimeIntervalSince1970:0];
+  NSTimeInterval dateTimeInterval = [date timeIntervalSinceDate:referenceDate];
+  
+  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K <= %@) AND (%K == %@)",fieldName1,dateTimeInterval,fieldName2,dateTimeInterval];
+  fetchRequest.predicate = predicate;
+  
+  NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+  
+  return [tags firstObject];
+  
+}
 
 //MARK: (CREATE) Data methods
 -(Tag *)createTagWithName:(NSString *)tagName{
@@ -157,8 +175,15 @@
   
   newTrip.city = city;
   newTrip.dates = dates;
-  newTrip.startDate = 1;
-  newTrip.endDate = 2;
+  
+  //Convert to time interval
+  NSDate *referenceDate = [NSDate dateWithTimeIntervalSince1970:0];
+  NSTimeInterval startTimeInterval = [startDate timeIntervalSinceDate:referenceDate];
+  NSTimeInterval endTimeInterval = [endDate timeIntervalSinceDate:referenceDate];
+  
+  newTrip.startDate = startTimeInterval;
+  newTrip.endDate = endTimeInterval;
+  
   newTrip.totalDays = 5;
   newTrip.coverImage = UIImageJPEGRepresentation(image, 1.0);
   //    newTrip.city = @"";
@@ -169,7 +194,7 @@
 
 -(void)createMomentWithImage:(UIImage*)image
                      notes:(NSString *)notes
-                         day:(int*)day
+                         day:(int)day
                         trip:(Trip *)trip
                         tags:(NSSet<Tag *>*)tags{
   
@@ -178,13 +203,15 @@
   
   newMoment.image = UIImageJPEGRepresentation(image, 1.0) ;
   newMoment.notes = notes;
-  newMoment.day = *(day);
+  newMoment.day = day;
   newMoment.tags = tags;
   newMoment.trip = trip;
   
 //  [self saveContext];
   
 }
+
+
 //-(void)addReceiptWithAmount:(double)amount
 //                       note:(NSString *)note
 //                  timestamp:(NSString *)timestamp

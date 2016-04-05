@@ -34,7 +34,8 @@
                     image:(UIImage *)image;
 -(void)createMomentWithImage:(UIImage*)image
                        notes:(NSString *)notes
-                         day:(int*)day
+                         day:(int)day
                         trip:(Trip *)trip
                         tags:(NSSet<Tag *>*)tags;
+-(Tag *)createTagWithName:(NSString *)tagName;
 @end

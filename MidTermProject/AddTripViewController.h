@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@class Trip;
 @interface AddTripViewController : UIViewController
+@property (strong, nonatomic) Trip *trip;
 
 @end
