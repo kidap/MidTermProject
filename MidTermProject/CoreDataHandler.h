@@ -52,6 +52,12 @@
         startDate:(NSDate*)startDate
           endDate:(NSDate*)endDate
             image:(UIImage *)image;
+-(void)updateMoment:(Moment *)moment
+              image:(UIImage*)image
+              notes:(NSString *)notes
+  datePhotoWasTaken:(NSDate *)datePhotoTaken
+               trip:(Trip *)trip
+               tags:(NSSet<Tag *>*)tags;
 //Delete
 -(void)deleteTrip:(Trip *)trip;
 @end

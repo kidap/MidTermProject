@@ -40,11 +40,9 @@
   if (self.sourceArray.count == 0){
     [[CoreDataHandler sharedInstance] createTripWithCity:@"Toronto"
                                                  country:@"Canada"
-                                                   //dates:@"March 21-31"
                                                startDate:[NSDate date]
                                                  endDate:[NSDate date]
                                                    image:[UIImage imageNamed:@"Toronto"]];
-    
   }
 }
 -(void)prepareDelegate{
@@ -74,11 +72,16 @@
   }
   tripCell.datesLabel.text  = self.sourceArray[indexPath.row].dates;
   
+  tripCell.layer.borderWidth  = 0.5;
+  tripCell.layer.borderColor  = [UIColor lightGrayColor].CGColor;
+  tripCell.layer.cornerRadius  = 5.0;
+  tripCell.backgroundColor = [UIColor whiteColor];
+  
   return tripCell;
 }
 //MARK: Actions
 - (IBAction)searchMoments:(id)sender {
-  UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Search" message:@"Enter a tag to search" preferredStyle:UIAlertControllerStyleAlert];
+  UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Search" message:@"Enter a tag" preferredStyle:UIAlertControllerStyleAlert];
   //Add text field
   [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
     //do nothing
@@ -88,6 +91,15 @@
     self.momentsArray = [[CoreDataHandler sharedInstance] getMomentsWithTagName:alertController.textFields[0].text];
     if (self.momentsArray.count > 0){
       [self performSegueWithIdentifier:@"showMoments" sender:self];
+    } else{
+      NSString *messageString = [NSString stringWithFormat:@"That's a cool hashtag! Unfortunately, you haven't used it yet in any of your moments."];
+      UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"No results" message:messageString preferredStyle:UIAlertControllerStyleAlert];
+      
+      //Add ok button
+      [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+      }]];
+      [self presentViewController:alertController animated:YES completion:nil];
     }
   }]];
   //Add cancel button
@@ -103,6 +115,8 @@
   if ([segue.identifier isEqualToString:@"showTripMoments"]){
     TripDetailViewController *destinationVC = segue.destinationViewController;
     destinationVC.trip = self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item];
+    NSLog(@"Start Date: %@",destinationVC.trip.startDate);
+    NSLog(@"End Date: %@",destinationVC.trip.endDate);
   }  else if ([segue.identifier isEqualToString:@"showMoments"]){
     MomentMainViewController *destinationVC = segue.destinationViewController;
     destinationVC.moments = [self.momentsArray copy];

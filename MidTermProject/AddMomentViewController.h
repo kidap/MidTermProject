@@ -9,6 +9,11 @@
 #import <UIKit/UIKit.h>
 @class Moment;
 
+@protocol momentDelegate <NSObject>
+-(void)reloadData;
+@end
+
 @interface AddMomentViewController : UIViewController
 @property (strong, nonatomic) Moment *moment;
+@property (weak, nonatomic) id<momentDelegate> delegate;
 @end

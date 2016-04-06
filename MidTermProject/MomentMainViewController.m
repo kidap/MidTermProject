@@ -14,7 +14,7 @@
 #import "Moment.h"
 #import "AddMomentViewController.h"
 
-@interface MomentMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource>
+@interface MomentMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource,momentDelegate>
 @property (strong, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (strong, nonatomic) NSArray<Moment *> *sourceArray;
 @end
@@ -45,8 +45,8 @@
     self.sourceArray = self.moments;
   }
   
-  //Sort by date
-  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO];
+  //Sort by date ASCENDING
+  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:YES];
   self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
   
   
@@ -68,11 +68,28 @@
   }
   return momentCell;
 }
+//MARK: Moment delegate
+-(void)reloadData{
+  if (self.trip){
+    self.trip = [[CoreDataHandler sharedInstance] getTripWithDate:self.trip.startDate];
+    NSSet *moments = self.trip.moments;
+    //Filter based on day selected
+    if (self.day != 0){
+      NSString *fieldName = @"day";
+      NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %i",fieldName,self.day];
+      self.sourceArray = [[moments allObjects] filteredArrayUsingPredicate:predicate];
+    } else{
+      self.sourceArray = [moments allObjects];
+    }
+    [self.collectionView reloadData];
+  }
+}
 //MARK: Navigation
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
   if ([segue.identifier isEqualToString:@"showEditMoment"]){
     AddMomentViewController *destinationVC = segue.destinationViewController;
     destinationVC.moment = self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item];
+    destinationVC.delegate = self;
   }
 }
 @end

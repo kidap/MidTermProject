@@ -112,18 +112,21 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
 }
 -(Trip *)getTripWithDate:(NSDate *)date{
-  NSError *error= nil;
-  NSString *fieldName1 = @"startDate";
-  NSString *fieldName2 = @"endDate";
-  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
-  
-  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K <= %@) AND (%K >= %@)",fieldName1,date,fieldName2,date];
-  fetchRequest.predicate = predicate;
-  
-  NSLog(@"Looking for a trip on %@",date);
-  NSArray *trips = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-  
-  return [trips firstObject];
+  if (date){
+    NSError *error= nil;
+    NSString *fieldName1 = @"startDate";
+    NSString *fieldName2 = @"endDate";
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K <= %@) AND (%K >= %@)",fieldName1,date,fieldName2,date];
+    fetchRequest.predicate = predicate;
+    
+    NSLog(@"Looking for a trip on %@",date);
+    NSArray *trips = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    
+    return [trips firstObject];
+  }
+  return nil;
 }
 -(NSArray *)getMomentsWithTagName:(NSString *)tagName{
   NSError *error= nil;
@@ -139,7 +142,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   for (Tag *tag in tags){
     [moments addObjectsFromArray:[tag.moments allObjects]];
   }
-
+  
   return moments;
 }
 -(NSArray *)getMomentsWithTag:(Tag *)tag{
@@ -181,7 +184,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 
 -(void)createTripWithCity:(NSString*)city
                   country:(NSString*)country
-                    //dates:(NSString *)dates
+//dates:(NSString *)dates
                 startDate:(NSDate*)startDate
                   endDate:(NSDate*)endDate
                     image:(UIImage *)image {
@@ -191,25 +194,43 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
   newTrip.city = city;
   newTrip.country = country;
-  
-  NSDateFormatter *f = [[NSDateFormatter alloc] init];
-  [f setDateFormat:dateFormat];
-  NSString *startDateString = [f stringFromDate:startDate];
-  NSString *endDateString = [f stringFromDate:endDate];
-  
+  //Format date text
+  NSString *startDateString = [self convertDateToString:startDate];
+  NSString *endDateString = [self convertDateToString:endDate];
   NSString *dateText = [startDateString stringByAppendingString:@"-"];
   dateText = [dateText stringByAppendingString:endDateString];
-  
   newTrip.dates = dateText;
-  newTrip.startDate = startDate;
-  newTrip.endDate = endDate;
+  
+  //Reset time on Start Date
+  //unsigned int flags = NSCalendarUnitSecond | NSCalendarUnitMinute | NSCalendarUnitHour;
+  NSCalendar* calendar = [NSCalendar currentCalendar];
+  NSDateComponents *components = [calendar components:NSUIntegerMax fromDate:startDate];
+    components.hour = 00;
+    components.minute = 00;
+    components.second = 00;
+  //  newTrip.startDate = [[NSCalendar currentCalendar]dateFromComponents:components ];
+  newTrip.startDate = [startDate dateByAddingTimeInterval:-components.hour*components.minute*components.minute];
+  
+  
+  //Reset time on End Date
+  components = [calendar components:NSUIntegerMax fromDate:endDate];
+  components.hour = 23;
+  components.minute = 59;
+  components.second = 59;
+  components.nanosecond = 59;
+  newTrip.endDate = [[NSCalendar currentCalendar]dateFromComponents:components ];
+  
+  components = [calendar components:NSUIntegerMax fromDate:newTrip.endDate];
+  
+  NSLog(@"Start Date:%@",[self convertDateToString:newTrip.startDate]);
+  NSLog(@"End Date:%@",[self convertDateToString:newTrip.endDate]);
   
   //Get total days of trip
   NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
-                                                      fromDate:startDate
-                                                        toDate:endDate
-                                                       options:NSCalendarWrapComponents];
+  components = [gregorianCalendar components:NSCalendarUnitDay
+                                    fromDate:startDate
+                                      toDate:endDate
+                                     options:NSCalendarWrapComponents];
   int daysOfTrip = (int)[components day] + 1;
   
   newTrip.totalDays = [NSNumber numberWithInteger:daysOfTrip];
@@ -253,7 +274,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 -(void)updateTrip:(Trip *)trip
              city:(NSString*)city
           country:(NSString*)country
-            //dates:(NSString *)dates
+//dates:(NSString *)dates
         startDate:(NSDate*)startDate
           endDate:(NSDate*)endDate
             image:(UIImage *)image {
@@ -261,10 +282,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   trip.city = city;
   trip.country = country;
   
-  NSDateFormatter *f = [[NSDateFormatter alloc] init];
-  [f setDateFormat:dateFormat];
-  NSString *startDateString = [f stringFromDate:startDate];
-  NSString *endDateString = [f stringFromDate:endDate];
+  NSString *startDateString = [self convertDateToString:startDate];
+  NSString *endDateString = [self convertDateToString:endDate];
   
   NSString *dateText = [startDateString stringByAppendingString:@"-"];
   dateText = [dateText stringByAppendingString:endDateString];
@@ -292,10 +311,48 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [self saveContext];
   
 }
+-(void)updateMoment:(Moment *)moment
+              image:(UIImage*)image
+              notes:(NSString *)notes
+  datePhotoWasTaken:(NSDate *)datePhotoTaken
+               trip:(Trip *)trip
+               tags:(NSSet<Tag *>*)tags{
+  
+  
+  moment.image = UIImageJPEGRepresentation(image, 1.0) ;
+  moment.notes = notes;
+  moment.date = datePhotoTaken;
+  
+  //Get total days of trip
+  NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
+                                                      fromDate:trip.startDate
+                                                        toDate:datePhotoTaken
+                                                       options:NSCalendarWrapComponents];
+  int day = (int)[components day] + 1;
+  NSLog(@"Save in day: %@",[@(day) stringValue]);
+  
+  moment.day = [NSNumber numberWithInteger:day];
+  moment.tags = tags;
+  moment.trip = trip;
+  
+  [self saveContext];
+  
+}
 
 //MARK: (DELETE) Data methods
 -(void)deleteTrip:(Trip *)trip{
   [self.managedObjectContext deleteObject:trip];
   [self saveContext];
+}
+-(NSString *)convertDateToString:(NSDate *)date{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  return [f stringFromDate:date];
+}
+-(NSDate *)convertStringToDate:(NSString *)dateString{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  return [f dateFromString:dateString];
 }
 @end

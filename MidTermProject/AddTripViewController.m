@@ -32,6 +32,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (strong, nonatomic) NSDate *startDate;
 @property (strong, nonatomic) NSDate *endDate;
 @property (strong, nonatomic) NSArray *sortedCountries;
+@property (strong, nonatomic) PDTSimpleCalendarViewController *calendarViewController;
 @end
 
 @implementation AddTripViewController
@@ -59,7 +60,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
   //Tap image to uploade image
   [self.imageView setUserInteractionEnabled:YES];
-  UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(uploadImage:)];
+  UITapGestureRecognizer *imageTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                    action:@selector(uploadImage:)];
   [self.imageView addGestureRecognizer:imageTapGesture];
   
   //Edit mode
@@ -71,7 +73,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     self.saveButton.hidden = YES;
     
     //Add save button navigation bar
-    UIBarButtonItem *save = [[UIBarButtonItem alloc] initWithTitle:@"Save" style:UIBarButtonItemStylePlain target:self action:@selector(saveTrip:)];
+    UIBarButtonItem *save = [[UIBarButtonItem alloc] initWithTitle:@"Save"
+                                                             style:UIBarButtonItemStylePlain
+                                                            target:self action:@selector(saveTrip:)];
     self.navigationItem.rightBarButtonItem = save;
     
     //Populates fields
@@ -93,15 +97,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 -(void)populateElementsFromTrip{
   self.countryTextField.text = self.trip.country;
   self.cityTextField.text = self.trip.city;
-  
-  NSDateFormatter *f = [[NSDateFormatter alloc] init];
-  [f setDateFormat:dateFormat];
-  NSString *startDate = [f stringFromDate:self.trip.startDate];
-  NSString *endDate = [f stringFromDate:self.trip.endDate];
-  
-  self.startDateTextField.text = startDate;
-  self.endDateTextField.text = endDate;
-  
+  self.startDate = self.trip.startDate;
+  self.endDate = self.trip.endDate;
   self.imageView.image = [UIImage imageWithData:self.trip.coverImage];
 }
 -(void)prepareCountryList{
@@ -145,12 +142,16 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
     
     [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
-      //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
       self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
-      [self setStartDate:self.photoTakenDate];
-      [self setEndDate:self.photoTakenDate];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"%@",self.photoTakenDate);
+        if (!self.trip){
+          [self setStartDate:self.photoTakenDate];
+          [self setEndDate:self.photoTakenDate];
+        }
+      });
     } failureBlock:^(NSError *error) {
-      NSLog(@"error: %@", error);
+      NSLog(@"Error in getting phote metadata: %@", error);
     }];
   }
   [picker dismissViewControllerAnimated:YES completion:nil];
@@ -168,16 +169,35 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   //Calendar text fields will have a tag 1 na
   if(textField.tag == 1 ||textField.tag == 2){
     self.dateTag = textField.tag;
-    PDTSimpleCalendarViewController *calendarViewController = [[PDTSimpleCalendarViewController alloc] init];
-    [calendarViewController setDelegate:self];
-    calendarViewController.weekdayHeaderEnabled = YES;
-    calendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
+    self.calendarViewController = [[PDTSimpleCalendarViewController alloc] init];
+    [self.calendarViewController setDelegate:self];
+    self.calendarViewController.weekdayHeaderEnabled = YES;
+    self.calendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
     
-    //Create Navigation Controller
-    UINavigationController *defaultNavController = [[UINavigationController alloc] initWithRootViewController:calendarViewController];
-    [calendarViewController setTitle:@"Select Date"];
+    //First date on calendar is 5 years ago
+    self.calendarViewController.firstDate = [[NSDate date] dateByAddingTimeInterval:-5*365*24*60*60];
+    //Last date on calendar is 1 year from now
+    self.calendarViewController.lastDate = [[NSDate date] dateByAddingTimeInterval:1*365*24*60*60];
+    //Set focus to current date
+    if(textField.tag == 1 && (self.trip.startDate || self.trip.endDate)){
+      if (self.trip.startDate){
+        [self.calendarViewController scrollToDate:self.trip.startDate animated:YES];
+      } else if (self.trip.endDate){
+        [self.calendarViewController scrollToDate:self.trip.endDate animated:YES];
+      }
+    } else if(textField.tag == 2 && (self.trip.startDate || self.trip.endDate)){
+      if (self.trip.endDate){
+        [self.calendarViewController scrollToDate:self.trip.endDate animated:YES];
+      } else if (self.trip.startDate){
+        [self.calendarViewController scrollToDate:self.trip.startDate animated:YES];
+      }
+    } else{
+      [self.calendarViewController scrollToDate:[NSDate date] animated:YES];
+    }
     
-    
+    //Create and present Navigation Controller
+    UINavigationController *defaultNavController = [[UINavigationController alloc] initWithRootViewController:self.calendarViewController];
+    [self.calendarViewController setTitle:@"Select Date"];
     [self presentViewController:defaultNavController animated:YES completion:nil];
   }
 }
@@ -199,11 +219,6 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   }
   return @"-";
 }
-//-(void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
-//  self.countryTextField.text = self.sortedCountries[row];
-//  [self.countryTextField resignFirstResponder];
-//}
-
 //MARK: - PDTSimpleCalendarViewDelegate
 - (void)simpleCalendarViewController:(PDTSimpleCalendarViewController *)controller didSelectDate:(NSDate *)date{
   if (self.dateTag == 1){
@@ -228,7 +243,6 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   if (!self.editMode){
     [[CoreDataHandler sharedInstance] createTripWithCity:self.cityTextField.text
                                                  country:self.countryTextField.text
-     //dates:dateText
                                                startDate:self.startDate
                                                  endDate:self.endDate
                                                    image:self.imageView.image];
@@ -238,7 +252,6 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [[CoreDataHandler sharedInstance] updateTrip:self.trip
                                             city:self.cityTextField.text
                                          country:self.countryTextField.text
-     //dates:dateText
                                        startDate:self.startDate
                                          endDate:self.endDate
                                            image:self.imageView.image];
@@ -275,19 +288,11 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 //MARK: Helper methods
 -(void)setStartDate:(NSDate *)date{
   _startDate = date;
-  NSDateFormatter *f = [[NSDateFormatter alloc] init];
-  [f setDateFormat:dateFormat];
-  NSString *dateString = [f stringFromDate:date];
-  
-  self.startDateTextField.text = dateString;
+  self.startDateTextField.text = [self convertDateToString:date];
 }
 -(void)setEndDate:(NSDate *)date{
   _endDate = date;
-  NSDateFormatter *f = [[NSDateFormatter alloc] init];
-  [f setDateFormat:dateFormat];
-  NSString *dateString = [f stringFromDate:date];
-  
-  self.endDateTextField.text = dateString;
+  self.endDateTextField.text = [self convertDateToString:date];
 }
 -(void)displayImagePicker{
   UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
@@ -326,4 +331,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [self presentViewController:actionSheet animated:YES completion:nil];
 }
 
+-(NSString *)convertDateToString:(NSDate *)date{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  return [f stringFromDate:date];
+}
 @end
