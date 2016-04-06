@@ -38,7 +38,7 @@
   
   for (int x = 0 ; x <= [self.trip.totalDays intValue]; x++){
     if (x != 0){
-    [self.sourceArray addObject:[NSString stringWithFormat:@"Day %i",x]];
+      [self.sourceArray addObject:[NSString stringWithFormat:@"Day %i",x]];
     } else{
       [self.sourceArray addObject:[NSString stringWithFormat:@"All"]];
     }
@@ -65,8 +65,8 @@
   DayCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"dayCell" forIndexPath:indexPath];
   
   //Day text
-   cell.dayLabel.text= self.sourceArray[indexPath.row];
-
+  cell.dayLabel.text= self.sourceArray[indexPath.row];
+  
   //Image - Filter based on day selected
   int currentDay = (int)indexPath.row;
   NSSet <Moment *>*moments = self.trip.moments;
@@ -79,8 +79,24 @@
     cell.imageView.image = [UIImage imageWithData: [moments anyObject].image];
   }
   
+  //Image properties
+  cell.imageView.layer.borderWidth  = 0.5;
+  cell.imageView.layer.borderColor  = [UIColor lightGrayColor].CGColor;
+  cell.imageView.layer.cornerRadius  = 5.0;
+  cell.imageView.backgroundColor = [UIColor whiteColor];
+  
   return cell;
 }
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+  DayCollectionViewCell *cell = (DayCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+  
+  //Show moments only if there is an image
+  if (cell.imageView.image){
+    [self performSegueWithIdentifier:@"showMoments" sender:self];
+  }
+  
+}
+
 //MARK: Action
 -(void)editTrip{
   [self performSegueWithIdentifier:@"showEditTrip" sender:self];
@@ -90,8 +106,8 @@
   if ([segue.identifier isEqualToString:@"showMoments"]){
     MomentMainViewController *destinationVC = segue.destinationViewController;
     destinationVC.trip = self.trip;
-//    destinationVC.day = (int)self.dayTableView.indexPathForSelectedRow.row;
-//    NSLog(@"Day selected:%ld",self.dayTableView.indexPathForSelectedRow.row);
+    //    destinationVC.day = (int)self.dayTableView.indexPathForSelectedRow.row;
+    //    NSLog(@"Day selected:%ld",self.dayTableView.indexPathForSelectedRow.row);
     destinationVC.day = (int)[self.dayCollectionView.indexPathsForSelectedItems firstObject].item;
     NSLog(@"Day selected:%ld",[self.dayCollectionView.indexPathsForSelectedItems firstObject].item);
   } else if ([segue.identifier isEqualToString:@"showEditTrip"]){

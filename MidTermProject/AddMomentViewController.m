@@ -17,7 +17,7 @@
 
 static bool askWatson = NO;
 
-@interface AddMomentViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextViewDelegate>
+@interface AddMomentViewController ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextViewDelegate,UITextViewDelegate>
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UITextView *notesTextView;
 @property (weak, nonatomic) IBOutlet UIView *tagsViewWrapper;
@@ -64,9 +64,9 @@ static bool askWatson = NO;
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardHide:) name:UIKeyboardDidHideNotification object:nil];
   
   //Tap view to dismiss keyboard
-  [self.scrollView setUserInteractionEnabled:YES];
-  UITapGestureRecognizer *viewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKB)];
-  [self.scrollView addGestureRecognizer:viewTapGesture];
+//  [self.scrollView setUserInteractionEnabled:YES];
+//  UITapGestureRecognizer *viewTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKB)];
+//  [self.scrollView addGestureRecognizer:viewTapGesture];
   self.scrollView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
 
   if (self.moment){
@@ -92,6 +92,7 @@ static bool askWatson = NO;
 -(void)populateElementsFromMoment{
   self.imageView.image = [UIImage imageWithData:self.moment.image];
   self.notesTextView.text = self.moment.notes;
+  self.photoTakenDate = self.moment.date;
 }
 //MARK: TableView delegate, datasource
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
@@ -234,6 +235,8 @@ static bool askWatson = NO;
 //MARK: Helper methods
 -(void)addTagWithName:(NSString *)name{
   [self.sourceArray insertObject:name atIndex:self.sourceArray.count-1];
+  UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:self.sourceArray.count-1 inSection:0]];
+  cell.accessoryType = UITableViewCellAccessoryCheckmark;
   [self.tableView reloadData];
 }
 
@@ -281,6 +284,14 @@ static bool askWatson = NO;
 -(void)textViewDidBeginEditing:(UITextView *)textView{
   textView.text = @"";
   [textView setTextColor:[UIColor blackColor]];
+}
+
+-(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+  if([text isEqualToString:@"\n"]) {
+    [textView resignFirstResponder];
+    return NO;
+  }
+  return YES;
 }
 //MARK: Handle keyboard
 -(void)keyboardShow:(NSNotification *)notification{

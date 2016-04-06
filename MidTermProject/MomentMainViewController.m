@@ -63,7 +63,9 @@
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
   MomentCollectionViewCell *momentCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"momentCell" forIndexPath:indexPath];
   momentCell.imageView.image = [UIImage imageWithData:self.sourceArray[indexPath.row].image];
-  momentCell.notes.text = self.sourceArray[indexPath.row].notes;
+  if (![self.sourceArray[indexPath.row].notes isEqualToString:@"<add notes>"]){
+    momentCell.notes.text = self.sourceArray[indexPath.row].notes;
+  }
   return momentCell;
 }
 //MARK: Navigation

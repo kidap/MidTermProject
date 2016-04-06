@@ -34,7 +34,7 @@
 //Create
 -(void)createTripWithCity:(NSString*)city
                   country:(NSString*)country
-                    dates:(NSString *)dates
+                    //dates:(NSString *)dates
                 startDate:(NSDate*)startDate
                   endDate:(NSDate*)endDate
                     image:(UIImage *)image;
@@ -48,7 +48,7 @@
 -(void)updateTrip:(Trip *)trip
              city:(NSString*)city
           country:(NSString*)country
-            dates:(NSString *)dates
+            //dates:(NSString *)dates
         startDate:(NSDate*)startDate
           endDate:(NSDate*)endDate
             image:(UIImage *)image;

@@ -13,6 +13,7 @@
 #import "Tag.h"
 #import "Trip.h"
 
+static NSString *dateFormat = @"MM/dd/yyyy";
 
 @implementation CoreDataHandler
 @synthesize managedObjectContext = _managedObjectContext;
@@ -180,7 +181,7 @@
 
 -(void)createTripWithCity:(NSString*)city
                   country:(NSString*)country
-                    dates:(NSString *)dates
+                    //dates:(NSString *)dates
                 startDate:(NSDate*)startDate
                   endDate:(NSDate*)endDate
                     image:(UIImage *)image {
@@ -190,7 +191,16 @@
   
   newTrip.city = city;
   newTrip.country = country;
-  newTrip.dates = dates;
+  
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  NSString *startDateString = [f stringFromDate:startDate];
+  NSString *endDateString = [f stringFromDate:endDate];
+  
+  NSString *dateText = [startDateString stringByAppendingString:@"-"];
+  dateText = [dateText stringByAppendingString:endDateString];
+  
+  newTrip.dates = dateText;
   newTrip.startDate = startDate;
   newTrip.endDate = endDate;
   
@@ -243,14 +253,23 @@
 -(void)updateTrip:(Trip *)trip
              city:(NSString*)city
           country:(NSString*)country
-            dates:(NSString *)dates
+            //dates:(NSString *)dates
         startDate:(NSDate*)startDate
           endDate:(NSDate*)endDate
             image:(UIImage *)image {
   
   trip.city = city;
   trip.country = country;
-  trip.dates = dates;
+  
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  NSString *startDateString = [f stringFromDate:startDate];
+  NSString *endDateString = [f stringFromDate:endDate];
+  
+  NSString *dateText = [startDateString stringByAppendingString:@"-"];
+  dateText = [dateText stringByAppendingString:endDateString];
+  
+  trip.dates = dateText;
   trip.startDate = startDate;
   trip.endDate = endDate;
   
@@ -264,6 +283,11 @@
   
   trip.totalDays = [NSNumber numberWithInt:daysOfTrip];
   trip.coverImage = UIImageJPEGRepresentation(image, 1.0);
+  
+  //Rebuild moments
+  //change the day properties
+  
+  //all days no longer in the range will be deleted
   
   [self saveContext];
   

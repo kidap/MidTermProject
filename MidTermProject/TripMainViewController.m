@@ -29,22 +29,18 @@
   [self prepareDelegate];
 }
 -(void)viewDidAppear:(BOOL)animated{
-  self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
-  [self.collectionView reloadData];
+  [self prepareCollectionView];
 }
 //MARK: Preparation
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
-  self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
-  
-  //self.collectionView.backgroundColor = [UIColor whiteColor];
+  [self prepareCollectionView];
   
   //Create test data
-  
   if (self.sourceArray.count == 0){
     [[CoreDataHandler sharedInstance] createTripWithCity:@"Toronto"
                                                  country:@"Canada"
-                                                   dates:@"March 21-31"
+                                                   //dates:@"March 21-31"
                                                startDate:[NSDate date]
                                                  endDate:[NSDate date]
                                                    image:[UIImage imageNamed:@"Toronto"]];
@@ -54,6 +50,13 @@
 -(void)prepareDelegate{
   self.collectionView.delegate = self;
   self.collectionView.dataSource = self;
+}
+-(void)prepareCollectionView{
+  self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
+  //Sort by date
+  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:NO];
+  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
+  [self.collectionView reloadData];
 }
 //MARK: Table view delegate
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
