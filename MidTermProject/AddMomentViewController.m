@@ -76,7 +76,6 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   self.notesTextView.layer.borderWidth  = 0.5;
   self.notesTextView.layer.borderColor  = [UIColor lightGrayColor].CGColor;
   self.notesTextView.layer.cornerRadius  = 5.0;
-  [self.notesTextView setTextColor:[UIColor lightGrayColor]];
   
   self.photoTakenDate = [[NSDate alloc] init];
   self.photoTakenLocation = [[CLLocation alloc] init];
@@ -186,58 +185,69 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     }];
   }
   
+  
+  
   if (picker.sourceType == UIImagePickerControllerSourceTypeCamera){
-    NSDictionary *metadata = [info objectForKey:UIImagePickerControllerMediaMetadata];
-    NSDictionary *exifMetadata = [metadata objectForKey:(id)kCGImagePropertyExifDictionary];
-    NSString *dateString = [exifMetadata objectForKey:(id)kCGImagePropertyExifDateTimeOriginal];
-    
-    NSString *dateFormat = @"yyyy:MM:dd HH:mm:ss";
-    NSDateFormatter *f = [[NSDateFormatter alloc] init];
-    [f setDateFormat:dateFormat];
-    self.photoTakenDate = [f dateFromString:dateString];
+    //    NSDictionary *metadata = [info objectForKey:UIImagePickerControllerMediaMetadata];
+    //    NSDictionary *exifMetadata = [metadata objectForKey:(id)kCGImagePropertyExifDictionary];
+    //    NSString *dateString = [exifMetadata objectForKey:(id)kCGImagePropertyExifDateTimeOriginal];
+    //
+    //    NSString *dateFormat = @"yyyy:MM:dd HH:mm:ss";
+    //    NSDateFormatter *f = [[NSDateFormatter alloc] init];
+    //    [f setDateFormat:dateFormat];
+    //    self.photoTakenDate = [f dateFromString:dateString];
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+    [library writeImageToSavedPhotosAlbum:self.imageView.image.CGImage
+                                 metadata:[info objectForKey:UIImagePickerControllerMediaMetadata]
+                          completionBlock:^(NSURL *assetURL, NSError *error) {
+                            
+                            NSLog(@"assetURL %@", assetURL);
+                            [self getMetaDataFromPhotoUsingLibrary:library assetURL: assetURL];
+                            
+                          }];
     
   } else if (picker.sourceType == UIImagePickerControllerSourceTypePhotoLibrary){
     
     //Get the date whent the photo was taken
     NSString* mediaType = info[UIImagePickerControllerMediaType];
     if(CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo){
-      ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
+      ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
       
-      [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
-        //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
-        
-        //Get date when the photo was taken
-        self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
-        self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
-        
-        //Get location from picture
-        CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
-        //Get location of user
-        [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
-          CLPlacemark *currentPlacemark;
-          for (CLPlacemark *placemark in placemarks){
-            currentPlacemark = placemark;
-            
-            NSLog(@"subLocality:%@",placemark.subLocality);
-            for (NSString *place in placemark.areasOfInterest){
-              //Split text if there is a /
-              NSArray *splitPlaces = [place componentsSeparatedByString:@"/"];
-              NSLog(@"areasOfInterest:%@",place);
-              for (NSString *singlePlace in splitPlaces){
-                dispatch_async(dispatch_get_main_queue(), ^{
-                  [self addTagWithName:singlePlace];
-                });
-              }
-            }
-          }
-        }];
-        
-      } failureBlock:^(NSError *error) {
-        NSLog(@"error: %@", error);
-      }];
+      [self getMetaDataFromPhotoUsingLibrary:library assetURL: [info objectForKey:UIImagePickerControllerReferenceURL]];
+//      [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
+//        //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
+//        
+//        //Get date when the photo was taken
+//        self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+//        self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
+//        
+//        //Get location from picture
+//        CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
+//        //Get location of user
+//        [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+//          CLPlacemark *currentPlacemark;
+//          for (CLPlacemark *placemark in placemarks){
+//            currentPlacemark = placemark;
+//            
+//            NSLog(@"subLocality:%@",placemark.subLocality);
+//            for (NSString *place in placemark.areasOfInterest){
+//              //Split text if there is a /
+//              NSArray *splitPlaces = [place componentsSeparatedByString:@"/"];
+//              NSLog(@"areasOfInterest:%@",place);
+//              for (NSString *singlePlace in splitPlaces){
+//                dispatch_async(dispatch_get_main_queue(), ^{
+//                  [self addTagWithName:singlePlace];
+//                });
+//              }
+//            }
+//          }
+//        }];
+//        
+//      } failureBlock:^(NSError *error) {
+//        NSLog(@"error: %@", error);
+//      }];
     }
   }
-  
   
   [picker dismissViewControllerAnimated:YES completion:nil];
 }
@@ -245,10 +255,10 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [self dismissViewControllerAnimated:YES completion:nil];
 }
 //MARK: TextField/TextView delegate
--(void)textViewDidBeginEditing:(UITextView *)textView{
-  textView.text = @"";
-  [textView setTextColor:[UIColor blackColor]];
-}
+//-(void)textViewDidBeginEditing:(UITextView *)textView{
+//  textView.text = @"";
+//  [textView setTextColor:[UIColor blackColor]];
+//}
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
   if([text isEqualToString:@"\n"]) {
@@ -290,8 +300,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     }
     
     
-    NSString *messageString = [NSString stringWithFormat:@"Moment saved in your trip to %@ (%@)",trip.city,trip.dates];
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Moment saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
+    NSString *messageString = [NSString stringWithFormat:@"Added moment to your trip to %@ (%@)",trip.city,trip.dates];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
     
     //Add ok button
     [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -309,9 +319,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Moment not saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
     
     //Add ok button
-    [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-      //[self dismissViewControllerAnimated:YES completion:nil];
-    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alertController animated:YES completion:nil];
   }
 }
@@ -327,12 +335,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   //Add ok button
   [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
     [self addTagWithName:alertController.textFields[0].text];
-    //[self.tableView reloadData];
   }]];
   //Add cancel button
-  [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-    //do nothing
-  }]];
+  [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
   
   [self presentViewController:alertController animated:YES completion:nil];
 }
@@ -362,7 +367,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   imagePicker.delegate = self;
   
   //Show an action with Camera and Photo library upload
-  UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:@"Select image" message:@"Select source" preferredStyle:UIAlertControllerStyleActionSheet];
+  UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:@"Select image source" message:@"" preferredStyle:UIAlertControllerStyleActionSheet];
   UIAlertAction *cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
     imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
     [self presentViewController:imagePicker animated:YES completion:nil];
@@ -403,6 +408,42 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [self.activityIndicatorView stopAnimating];
   self.watsonLabel.alpha = 0;
   self.activityIndicatorView.alpha = 0;
+}
+-(void) getMetaDataFromPhotoUsingLibrary:(ALAssetsLibrary *)library assetURL:(NSURL *)assetURL{
+  [library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+    //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
+    
+    //Get date when the photo was taken
+    self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+    self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
+    NSLog(@"Photo Date: %@", [self convertDateToString: self.photoTakenDate]);
+    NSLog(@"Photo Location: %@",self.photoTakenLocation);
+    
+    //Get location from picture
+    CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
+    //Get location of user
+    [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+      CLPlacemark *currentPlacemark;
+      for (CLPlacemark *placemark in placemarks){
+        currentPlacemark = placemark;
+        
+        NSLog(@"subLocality:%@",placemark.subLocality);
+        for (NSString *place in placemark.areasOfInterest){
+          //Split text if there is a /
+          NSArray *splitPlaces = [place componentsSeparatedByString:@"/"];
+          NSLog(@"areasOfInterest:%@",place);
+          for (NSString *singlePlace in splitPlaces){
+            dispatch_async(dispatch_get_main_queue(), ^{
+              [self addTagWithName:singlePlace];
+            });
+          }
+        }
+      }
+    }];
+    
+  } failureBlock:^(NSError *error) {
+    NSLog(@"error: %@", error);
+  }];
 }
 //MARK: Handle keyboard
 -(void)keyboardShow:(NSNotification *)notification{

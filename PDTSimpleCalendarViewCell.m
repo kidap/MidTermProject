@@ -191,7 +191,7 @@ const CGFloat PDTSimpleCalendarCircleSize = 32.0f;
         return _circleTodayColor;
     }
 
-    return [UIColor grayColor];
+    return [UIColor blueColor];//grayColor];
 }
 
 - (UIColor *)circleSelectedColor

@@ -49,7 +49,6 @@
   NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:YES];
   self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
   
-  
   self.collectionView.backgroundColor = [UIColor whiteColor];
   self.navigationController.navigationItem.title = [NSString stringWithFormat:@"Day %d",self.day];
 }

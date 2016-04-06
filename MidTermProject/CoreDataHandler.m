@@ -94,7 +94,20 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 }
 -(NSArray *)getAllTags{
   NSError *error = nil;
+  
+  //Delete empty tags
   NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
+  
+  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"moments.@count == 0"];
+  fetchRequest.predicate = predicate;
+  
+  NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+  for (Tag *tag in tags){
+  [self.managedObjectContext deleteObject:tag];
+  }
+
+  //Get all tags with moments
+  fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
   
   return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
 }

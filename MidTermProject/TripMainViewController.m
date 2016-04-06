@@ -103,9 +103,7 @@
     }
   }]];
   //Add cancel button
-  [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-    //do nothing
-  }]];
+  [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
   
   [self presentViewController:alertController animated:YES completion:nil];
 }

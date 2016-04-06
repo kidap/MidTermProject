@@ -33,6 +33,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (strong, nonatomic) NSDate *endDate;
 @property (strong, nonatomic) NSArray *sortedCountries;
 @property (strong, nonatomic) PDTSimpleCalendarViewController *calendarViewController;
+@property (nonatomic, strong) NSMutableArray *customDates;
 @end
 
 @implementation AddTripViewController
@@ -132,6 +133,15 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
   self.countryTextField.inputAccessoryView = keyboardDoneButtonView;
 }
+-(void)prepareCalendar{
+  self.customDates = [[NSMutableArray alloc] init];
+  self.calendarViewController = [[PDTSimpleCalendarViewController alloc] init];
+  [self.calendarViewController setDelegate:self];
+  self.calendarViewController.weekdayHeaderEnabled = YES;
+  self.calendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
+  
+  [[PDTSimpleCalendarViewCell appearance] setCircleSelectedColor:[UIColor redColor]];
+}
 //MARK: Image Picker delegate
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
   [self.imageView setImage: info[@"UIImagePickerControllerOriginalImage"]];
@@ -161,35 +171,40 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [self dismissViewControllerAnimated:YES completion:nil];
 }
 //MARK: TextField delegate
--(BOOL)textFieldShouldReturn:(UITextField *)textField{
-  [textField resignFirstResponder];
-  return YES;
-}
 -(void)textFieldDidBeginEditing:(UITextField *)textField{
   //Calendar text fields will have a tag 1 na
   if(textField.tag == 1 ||textField.tag == 2){
     self.dateTag = textField.tag;
-    self.calendarViewController = [[PDTSimpleCalendarViewController alloc] init];
-    [self.calendarViewController setDelegate:self];
-    self.calendarViewController.weekdayHeaderEnabled = YES;
-    self.calendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
+    
+    [self prepareCalendar];
+    
+    //Set the start and end circle color
+    [self.customDates removeAllObjects];
+    NSLog(@"Start Date:%@",[self convertDateToString:self.startDate]);
+    NSLog(@"End Date:%@",[self convertDateToString:self.endDate]);
+    if (self.startDate){
+      [self.customDates addObject:self.startDate];
+    }
+    if (self.endDate){
+      [self.customDates addObject:self.endDate];
+    }
     
     //First date on calendar is 5 years ago
     self.calendarViewController.firstDate = [[NSDate date] dateByAddingTimeInterval:-5*365*24*60*60];
     //Last date on calendar is 1 year from now
     self.calendarViewController.lastDate = [[NSDate date] dateByAddingTimeInterval:1*365*24*60*60];
     //Set focus to current date
-    if(textField.tag == 1 && (self.trip.startDate || self.trip.endDate)){
-      if (self.trip.startDate){
-        [self.calendarViewController scrollToDate:self.trip.startDate animated:YES];
-      } else if (self.trip.endDate){
-        [self.calendarViewController scrollToDate:self.trip.endDate animated:YES];
+    if(textField.tag == 1 && (self.startDate || self.endDate)){
+      if (self.startDate){
+        [self.calendarViewController scrollToDate:self.startDate animated:YES];
+      } else if (self.endDate){
+        [self.calendarViewController scrollToDate:self.endDate animated:YES];
       }
-    } else if(textField.tag == 2 && (self.trip.startDate || self.trip.endDate)){
-      if (self.trip.endDate){
-        [self.calendarViewController scrollToDate:self.trip.endDate animated:YES];
-      } else if (self.trip.startDate){
-        [self.calendarViewController scrollToDate:self.trip.startDate animated:YES];
+    } else if(textField.tag == 2 && (self.startDate || self.endDate)){
+      if (self.endDate){
+        [self.calendarViewController scrollToDate:self.endDate animated:YES];
+      } else if (self.startDate){
+        [self.calendarViewController scrollToDate:self.startDate animated:YES];
       }
     } else{
       [self.calendarViewController scrollToDate:[NSDate date] animated:YES];
@@ -200,6 +215,10 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [self.calendarViewController setTitle:@"Select Date"];
     [self presentViewController:defaultNavController animated:YES completion:nil];
   }
+}
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+  [textField resignFirstResponder];
+  return YES;
 }
 //MARK: - Country Picker
 - (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView{
@@ -221,18 +240,37 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 }
 //MARK: - PDTSimpleCalendarViewDelegate
 - (void)simpleCalendarViewController:(PDTSimpleCalendarViewController *)controller didSelectDate:(NSDate *)date{
+  
   if (self.dateTag == 1){
-    self.startDate = date;
+    //if (!self.endDate || (self.endDate && date <= self.endDate)){
+      self.startDate = date;
+    //  [self dismissViewControllerAnimated:YES completion:nil];
+    //} else{
+    //  NSLog(@"Error");
+
+    //}
   } else if (self.dateTag == 2){
-    self.endDate = date;
+    //if (!self.startDate || (self.startDate && date >= self.startDate)){
+      self.endDate = date;
+    //  [self dismissViewControllerAnimated:YES completion:nil];
+    //} else{
+    //  NSLog(@"Error");
+    //}
   }
   [self dismissViewControllerAnimated:YES completion:nil];
 }
 - (UIColor *)simpleCalendarViewController:(PDTSimpleCalendarViewController *)controller circleColorForDate:(NSDate *)date{
-  return [UIColor whiteColor];
+  return [UIColor redColor];
 }
 - (UIColor *)simpleCalendarViewController:(PDTSimpleCalendarViewController *)controller textColorForDate:(NSDate *)date{
-  return [UIColor orangeColor];
+  return [UIColor whiteColor];
+}
+- (BOOL)simpleCalendarViewController:(PDTSimpleCalendarViewController *)controller shouldUseCustomColorsForDate:(NSDate *)date{
+  if ([self.customDates containsObject:date]) {
+    return YES;
+  }
+  
+  return NO;
 }
 //MARK: Actions
 - (IBAction)uploadImage:(id)sender {
@@ -273,8 +311,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     }]];
     
     //Add cancel button
-    [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     
     [self presentViewController:alertController animated:YES completion:nil];
   }
@@ -299,7 +336,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   imagePicker.delegate = self;
   
   //Show an action with Camera and Photo library upload
-  UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:@"Select image" message:@"Select source" preferredStyle:UIAlertControllerStyleActionSheet];
+  UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:@"Select image source" message:@"" preferredStyle:UIAlertControllerStyleActionSheet];
   UIAlertAction *cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
     imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
     [self presentViewController:imagePicker animated:YES completion:nil];

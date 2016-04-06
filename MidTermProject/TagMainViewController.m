@@ -28,6 +28,10 @@
 //MARK: Preparation
 - (void)prepareView {
   self.sourceArray = [[CoreDataHandler sharedInstance] getAllTags];
+  
+  //Sort by date ASCENDING
+  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"moments.@count" ascending:NO];
+  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
 }
 
 - (void)prepareDelegates {
@@ -42,6 +46,7 @@
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"tagCell" forIndexPath:indexPath];
   
   cell.textLabel.text = self.sourceArray[indexPath.row].tagName;
+  cell.detailTextLabel.text = [@(self.sourceArray[indexPath.row].moments.count) stringValue];
   
   return cell;
 }
