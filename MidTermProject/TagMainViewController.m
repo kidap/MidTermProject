@@ -31,7 +31,8 @@
   
   //Sort by date ASCENDING
   NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"moments.@count" ascending:NO];
-  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
+  NSSortDescriptor *sortDescriptor2 = [NSSortDescriptor sortDescriptorWithKey:@"tagName" ascending:YES];
+  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor,sortDescriptor2]];
 }
 
 - (void)prepareDelegates {

@@ -25,9 +25,11 @@
   
   [self prepareView];
   [self prepareDelegate];
+  [self prepareGestures];
 }
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
+  self.collectionView.backgroundColor = [UIColor whiteColor];
   
   //if selected using a trip, get moments related to trip
   //else, tag was used to get all moments
@@ -50,8 +52,12 @@
   NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:YES];
   self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
   
-  self.collectionView.backgroundColor = [UIColor whiteColor];
-  self.navigationController.navigationItem.title = [NSString stringWithFormat:@"Day %d",self.day];
+  //Set title of the navigation bar
+  if (self.day != 0){
+    self.navigationItem.title = [NSString stringWithFormat:@"Day %d",self.day];
+  } else{
+    self.navigationItem.title = @"All";
+  }
 }
 -(void)prepareDelegate{
   self.collectionView.delegate = self;
@@ -60,6 +66,9 @@
 -(void)prepareGestures{
   UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGesture:)];
   [self.collectionView addGestureRecognizer:longPressGesture];
+  
+  UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGesture:)];
+  [self.collectionView addGestureRecognizer:tapGesture];
 }
 //MARK:Collection delegate
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
@@ -71,10 +80,21 @@
   if (![self.sourceArray[indexPath.row].notes isEqualToString:@"<add notes>"]){
     momentCell.notes.text = self.sourceArray[indexPath.row].notes;
   }
+  
+//  momentCell.imageView.layer.borderWidth = 0.5;
+//  momentCell.imageView.layer.borderColor  = [UIColor grayColor].CGColor;
+  
+  momentCell.layer.shadowRadius = 3.0f;
+  momentCell.layer.shadowColor = [UIColor colorWithRed:0.325 green:0.518 blue:0.635 alpha:1].CGColor;//[UIColor grayColor].CGColor;
+  momentCell.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+  momentCell.layer.shadowOpacity = 0.5f;
+  momentCell.layer.masksToBounds = NO;
+  momentCell.backgroundColor = [UIColor whiteColor];
+  
   return momentCell;
 }
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
-  [self performSegueWithIdentifier:@"showFullScreenPhoto" sender:self];
+  //  [self performSegueWithIdentifier:@"showFullScreenPhoto" sender:self];
 }
 //MARK: Moment delegate
 -(void)reloadData{
@@ -93,22 +113,27 @@
   }
 }
 //MARK:Actions
+-(void)tapGesture:(UITapGestureRecognizer *)recognizer{
+  switch (recognizer.state) {
+    case UIGestureRecognizerStateEnded:{
+      [self.collectionView selectItemAtIndexPath:[self.collectionView indexPathForItemAtPoint:[recognizer locationInView:self.collectionView]] animated:YES scrollPosition:UICollectionViewScrollPositionTop];
+      [self performSegueWithIdentifier:@"showFullScreenPhoto" sender:self];
+      NSLog(@"Tap");
+      break;
+    }
+    default:
+      break;
+  }
+}
 -(void)longPressGesture:(UILongPressGestureRecognizer *)recognizer{
   switch (recognizer.state) {
     case UIGestureRecognizerStateBegan:{
-      
       [self.collectionView selectItemAtIndexPath:[self.collectionView indexPathForItemAtPoint:[recognizer locationInView:self.collectionView]] animated:YES scrollPosition:UICollectionViewScrollPositionTop];
       [self performSegueWithIdentifier:@"showEditMoment" sender:self];
-      
       NSLog(@"Long pressed");
       break;
     }
-      //    case UIGestureRecognizerStateChanged:
-      //      [self.collectionView updateInteractiveMovementTargetPosition:[recognizer locationInView:recognizer.view]];
-      //      break;
-      //    case UIGestureRecognizerStateEnded:
-      //      [self.collectionView endInteractiveMovement];
-      //      break;
+      
     default:
       break;
   }

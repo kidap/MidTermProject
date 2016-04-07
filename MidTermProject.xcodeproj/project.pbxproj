@@ -38,6 +38,7 @@
 		A7C71D061CB4AD59002821EE /* PDTSimpleCalendarViewHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CFF1CB4AD59002821EE /* PDTSimpleCalendarViewHeader.m */; };
 		A7C71D071CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71D011CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.m */; };
 		A7C71D301CB60561002821EE /* MomentPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71D2F1CB60561002821EE /* MomentPhotoViewController.m */; };
+		A7C71D331CB610AA002821EE /* TagCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71D321CB610AA002821EE /* TagCollectionViewCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +100,8 @@
 		A7C71D011CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDTSimpleCalendarViewWeekdayHeader.m; sourceTree = "<group>"; };
 		A7C71D2E1CB60561002821EE /* MomentPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MomentPhotoViewController.h; sourceTree = "<group>"; };
 		A7C71D2F1CB60561002821EE /* MomentPhotoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MomentPhotoViewController.m; sourceTree = "<group>"; };
+		A7C71D311CB610AA002821EE /* TagCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagCollectionViewCell.h; sourceTree = "<group>"; };
+		A7C71D321CB610AA002821EE /* TagCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagCollectionViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,8 +188,7 @@
 				A7C71C731CB2F7CC002821EE /* TripMainViewController.m */,
 				A7C71C751CB2F7DD002821EE /* TripDetailViewController.h */,
 				A7C71C761CB2F7DD002821EE /* TripDetailViewController.m */,
-				A7C71C9E1CB331F8002821EE /* AddTripViewController.h */,
-				A7C71C9F1CB331F8002821EE /* AddTripViewController.m */,
+				A7C71D5A1CB698AF002821EE /* Add/Edit */,
 			);
 			name = Trip;
 			sourceTree = "<group>";
@@ -196,10 +198,9 @@
 			children = (
 				A7C71C7A1CB2F85E002821EE /* MomentMainViewController.h */,
 				A7C71C7B1CB2F85E002821EE /* MomentMainViewController.m */,
-				A7C71C971CB30DE1002821EE /* AddMomentViewController.h */,
-				A7C71C981CB30DE1002821EE /* AddMomentViewController.m */,
 				A7C71D2E1CB60561002821EE /* MomentPhotoViewController.h */,
 				A7C71D2F1CB60561002821EE /* MomentPhotoViewController.m */,
+				A7C71D5B1CB698BF002821EE /* Add/Edit */,
 			);
 			name = Moment;
 			sourceTree = "<group>";
@@ -240,6 +241,8 @@
 				A7C71CA21CB338A8002821EE /* MomentCollectionViewCell.m */,
 				A7C71CE01CB4519A002821EE /* DayCollectionViewCell.h */,
 				A7C71CE11CB4519A002821EE /* DayCollectionViewCell.m */,
+				A7C71D311CB610AA002821EE /* TagCollectionViewCell.h */,
+				A7C71D321CB610AA002821EE /* TagCollectionViewCell.m */,
 			);
 			name = "View Cell";
 			sourceTree = "<group>";
@@ -280,6 +283,24 @@
 			);
 			name = PDTSimpleCalendar;
 			path = ..;
+			sourceTree = "<group>";
+		};
+		A7C71D5A1CB698AF002821EE /* Add/Edit */ = {
+			isa = PBXGroup;
+			children = (
+				A7C71C9E1CB331F8002821EE /* AddTripViewController.h */,
+				A7C71C9F1CB331F8002821EE /* AddTripViewController.m */,
+			);
+			name = Add/Edit;
+			sourceTree = "<group>";
+		};
+		A7C71D5B1CB698BF002821EE /* Add/Edit */ = {
+			isa = PBXGroup;
+			children = (
+				A7C71C971CB30DE1002821EE /* AddMomentViewController.h */,
+				A7C71C981CB30DE1002821EE /* AddMomentViewController.m */,
+			);
+			name = Add/Edit;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -369,6 +390,7 @@
 				A7C71CEF1CB46B4D002821EE /* Tag+CoreDataProperties.m in Sources */,
 				A7C71C771CB2F7DD002821EE /* TripDetailViewController.m in Sources */,
 				A7C71CDE1CB431E1002821EE /* TagMainViewController.m in Sources */,
+				A7C71D331CB610AA002821EE /* TagCollectionViewCell.m in Sources */,
 				A7C71C741CB2F7CC002821EE /* TripMainViewController.m in Sources */,
 				A7C71D051CB4AD59002821EE /* PDTSimpleCalendarViewFlowLayout.m in Sources */,
 				A7C71CF11CB46B4D002821EE /* Moment+CoreDataProperties.m in Sources */,
@@ -530,6 +552,7 @@
 				A7C71C601CB2F1D4002821EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 

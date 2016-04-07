@@ -34,11 +34,11 @@
 //MARK: Preparation
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
-  [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
-                                                forBarMetrics:UIBarMetricsDefault];
+//  [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
+//                                                forBarMetrics:UIBarMetricsDefault];
   self.navigationController.navigationBar.shadowImage = [UIImage new];
   self.navigationController.navigationBar.translucent = YES;
-  self.navigationController.view.backgroundColor = [UIColor clearColor];
+  self.navigationController.view.backgroundColor = [UIColor colorWithRed:0 green:64 blue:128 alpha:1.01];
   
   [self prepareCollectionView];
   
@@ -78,9 +78,14 @@
   }
   tripCell.datesLabel.text  = self.sourceArray[indexPath.row].dates;
   
-  tripCell.layer.borderWidth  = 0.5;
-  tripCell.layer.borderColor  = [UIColor lightGrayColor].CGColor;
-  tripCell.layer.cornerRadius  = 5.0;
+  tripCell.imageView.layer.borderWidth = 0.5;
+  tripCell.imageView.layer.borderColor  = [UIColor grayColor].CGColor;
+  
+  tripCell.layer.shadowRadius = 3.0f;
+  tripCell.layer.shadowColor = [UIColor grayColor].CGColor;
+  tripCell.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+  tripCell.layer.shadowOpacity = 0.5f;
+  tripCell.layer.masksToBounds = NO;
   tripCell.backgroundColor = [UIColor whiteColor];
   
   return tripCell;

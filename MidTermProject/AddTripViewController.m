@@ -26,6 +26,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIButton *saveButton;
 @property (weak, nonatomic) IBOutlet UIButton *deleteButton;
+@property (weak, nonatomic) IBOutlet UILabel *imageUploadLabel;
+@property (weak, nonatomic) IBOutlet UINavigationBar *customNavigationBar;
+@property (weak, nonatomic) IBOutlet UIImageView *backgroundImageView;
 @property (strong, nonatomic) UIPickerView *countryPicker;
 @property (strong, nonatomic) NSDate *photoTakenDate;
 @property (assign, nonatomic) bool editMode;
@@ -36,7 +39,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (strong, nonatomic) PDTSimpleCalendarViewController *calendarViewController;
 @property (nonatomic, strong) NSMutableArray *customDates;
 @property (strong, nonatomic) CLLocation *photoTakenLocation;
-@property (strong, nonatomic) IBOutlet UILabel *imageUploadLabel;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorViewCountry;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorViewCity;
 @end
 
 @implementation AddTripViewController
@@ -50,15 +54,11 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [self prepareCountryPicker];
 }
 -(void)prepareView{
-  //  self.cancelButton.layer.borderWidth  = 0.5;
-  //  self.cancelButton.layer.borderColor  = [UIColor lightGrayColor].CGColor;
-  //  self.cancelButton.layer.cornerRadius  = 5.0;
-  //  self.cancelButton.backgroundColor = [UIColor whiteColor];
-  //  self.cancelButton.titleLabel.textColor = [UIColor redColor];
-  //  self.saveButton.layer.borderWidth  = 0.5;
-  //  self.saveButton.layer.borderColor  = [UIColor lightGrayColor].CGColor;
-  //  self.saveButton.layer.cornerRadius  = 5.0;
-  //  self.saveButton.backgroundColor = [UIColor whiteColor];
+  //Init Activity Indicator
+  self.activityIndicatorViewCountry.alpha = 0;
+  [self.activityIndicatorViewCountry stopAnimating];
+  self.activityIndicatorViewCity.alpha = 0;
+  [self.activityIndicatorViewCity stopAnimating];
   
   self.saveButton.titleLabel.textColor = [UIColor greenColor];
   
@@ -75,12 +75,16 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     self.imageView.alpha = 1;
     self.deleteButton.alpha = 1;
     self.saveButton.hidden = YES;
+    self.customNavigationBar.hidden = YES;
+    self.imageUploadLabel.hidden = YES;
+    
     
     //Add save button navigation bar
     UIBarButtonItem *save = [[UIBarButtonItem alloc] initWithTitle:@"Save"
                                                              style:UIBarButtonItemStylePlain
                                                             target:self action:@selector(saveTrip:)];
     self.navigationItem.rightBarButtonItem = save;
+    self.navigationItem.title = @"Edit Trip";
     
     //Populates fields
     [self populateElementsFromTrip];
@@ -91,6 +95,10 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [self displayImagePicker];
   }
   
+  self.imageView.layer.shadowRadius = 3.0f;
+  self.imageView.layer.shadowColor = [UIColor grayColor].CGColor;
+  self.imageView.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
+  self.imageView.layer.shadowOpacity = 0.5f;
 }
 -(void)prepareDelegates{
   self.countryTextField.delegate = self;
@@ -148,42 +156,105 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 //MARK: Image Picker delegate
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
   [self.imageView setImage: info[@"UIImagePickerControllerOriginalImage"]];
+  self.imageView.alpha = 1;
   self.imageUploadLabel.alpha = 0;
   
+  //Start animating Activity Indicator
+  self.activityIndicatorViewCountry.alpha = 1;
+  [self.activityIndicatorViewCountry startAnimating];
+  self.activityIndicatorViewCity.alpha = 1;
+  [self.activityIndicatorViewCity startAnimating];
   
-  //Get the date whent the photo was taken
-  NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
-  if(CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo){
-    ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
+  
+  if (picker.sourceType == UIImagePickerControllerSourceTypeCamera){
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+    [library writeImageToSavedPhotosAlbum:self.imageView.image.CGImage
+                                 metadata:[info objectForKey:UIImagePickerControllerMediaMetadata]
+                          completionBlock:^(NSURL *assetURL, NSError *error) {
+                            
+                            NSLog(@"assetURL %@", assetURL);
+                            [self getMetaDataFromPhotoUsingLibrary:library assetURL: assetURL];
+                            
+                          }];
     
-    [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
-      self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
-      self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
-      dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"%@",self.photoTakenDate);
-        if (!self.trip){
-          [self setStartDate:self.photoTakenDate];
-          [self setEndDate:self.photoTakenDate];
-        }
-      });
+  } else if (picker.sourceType == UIImagePickerControllerSourceTypePhotoLibrary){
+    
+    //Get the date whent the photo was taken
+    NSString* mediaType = info[UIImagePickerControllerMediaType];
+    if(CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo){
+      ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
       
-      //Get location from picture
-      CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
-      //Get location of user
-      [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
-        CLPlacemark *currentPlacemark = [placemarks firstObject];
-        dispatch_async(dispatch_get_main_queue(), ^{
-          self.countryTextField.text = currentPlacemark.country;
-          self.cityTextField.text = currentPlacemark.locality;
-        });
-      }];
-    } failureBlock:^(NSError *error) {
-      NSLog(@"Error in getting phote metadata: %@", error);
-    }];
+      [self getMetaDataFromPhotoUsingLibrary:library assetURL: [info objectForKey:UIImagePickerControllerReferenceURL]];
+    }
   }
+  //  //Get the date whent the photo was taken
+  //  NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+  //  if(CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo){
+  //    ALAssetsLibrary *lib = [[ALAssetsLibrary alloc] init];
+  //
+  //    [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
+  //      self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+  //      self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
+  //      dispatch_async(dispatch_get_main_queue(), ^{
+  //        NSLog(@"PhotoTakenDate%@",self.photoTakenDate);
+  //        if (!self.trip){
+  //          [self setStartDate:self.photoTakenDate];
+  //          [self setEndDate:self.photoTakenDate];
+  //        }
+  //      });
+  //
+  //      //Get location from picture
+  //      CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
+  //      //Get location of user
+  //      [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+  //        CLPlacemark *currentPlacemark = [placemarks firstObject];
+  //        dispatch_async(dispatch_get_main_queue(), ^{
+  //          self.countryTextField.text = currentPlacemark.country;
+  //          self.cityTextField.text = currentPlacemark.locality;
+  //        });
+  //      }];
+  //    } failureBlock:^(NSError *error) {
+  //      NSLog(@"Error in getting phote metadata: %@", error);
+  //    }];
+  //  }
   [picker dismissViewControllerAnimated:YES completion:nil];
 }
-
+-(void) getMetaDataFromPhotoUsingLibrary:(ALAssetsLibrary *)library assetURL:(NSURL *)assetURL{
+  [library assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+    //NSLog(@"created: %@", [asset valueForProperty:ALAssetPropertyDate]);
+    
+    //Get date when the photo was taken
+    self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+    self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
+    NSLog(@"Photo Date: %@", [self convertDateToString: self.photoTakenDate]);
+    NSLog(@"Photo Location: %@",self.photoTakenLocation);
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (!self.trip){
+        [self setStartDate:self.photoTakenDate];
+        [self setEndDate:self.photoTakenDate];
+      }
+    });
+    
+    //Get location from picture
+    CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
+    //Get location of user
+    [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+      CLPlacemark *currentPlacemark = [placemarks firstObject];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        self.countryTextField.text = currentPlacemark.country;
+        self.cityTextField.text = currentPlacemark.locality;
+        
+        //Stop animating Activity Indicator
+        self.activityIndicatorViewCountry.alpha = 0;
+        [self.activityIndicatorViewCountry stopAnimating];
+        self.activityIndicatorViewCity.alpha = 0;
+        [self.activityIndicatorViewCity stopAnimating];
+      });
+    }];
+  } failureBlock:^(NSError *error) {
+    NSLog(@"error: %@", error);
+  }];
+}
 -(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
   [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -304,12 +375,13 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [self dismissViewControllerAnimated:YES completion:nil];
     [self.navigationController popViewControllerAnimated:YES];
   } else{
-    [[CoreDataHandler sharedInstance] updateTrip:self.trip
-                                            city:self.cityTextField.text
-                                         country:self.countryTextField.text
-                                       startDate:self.startDate
-                                         endDate:self.endDate
-                                           image:self.imageView.image];
+      [[CoreDataHandler sharedInstance] updateTrip:self.trip
+                                              city:self.cityTextField.text
+                                           country:self.countryTextField.text
+                                         startDate:self.startDate
+                                           endDate:self.endDate
+                                             image:self.imageView.image];
+    
     [self.navigationController popToRootViewControllerAnimated:YES];
   }
 }

@@ -88,11 +88,15 @@ static NSString *password = @"DS2cavB6d4MW";
       NSArray *images = responseDictionary[@"images"];
       NSDictionary *image = [images firstObject];
       NSArray *scores = image[@"scores"];
-      for (int x = 0; x < 3; x++){
+      for (int x = 0; x < scores.count ; x++){
         NSDictionary *score = scores[x];
         NSLog(@"%@",score[@"name"]);
         NSLog(@"%@",score[@"score"]);
         [returnSet addObject:score[@"name"]];
+        
+        if (x==2){
+          break;
+        }
       }
       completionHandler(YES,returnSet);
     } else{

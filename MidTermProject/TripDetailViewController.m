@@ -29,12 +29,6 @@
   self.sourceArray = [[NSMutableArray alloc] init];
   UIBarButtonItem *edit = [[UIBarButtonItem alloc] initWithTitle:@"Edit Trip" style:UIBarButtonItemStylePlain target:self action:@selector(editTrip)];
   self.navigationItem.rightBarButtonItem = edit;
-  
-  [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
-                                                forBarMetrics:UIBarMetricsDefault];
-  self.navigationController.navigationBar.shadowImage = [UIImage new];
-  self.navigationController.navigationBar.translucent = YES;
-  self.navigationController.view.backgroundColor = [UIColor clearColor];
 }
 -(void)prepareCollectionView{
   self.dayTableView.delegate = self;
@@ -76,7 +70,7 @@
   
   //Image properties
   cell.imageView.layer.borderWidth  = 0.5;
-  cell.imageView.layer.borderColor  = [UIColor lightGrayColor].CGColor;
+  cell.imageView.layer.borderColor  = [UIColor colorWithRed:0.333 green:0.243 blue:0.322 alpha:1].CGColor;//[UIColor lightGrayColor].CGColor;
   cell.imageView.layer.cornerRadius  = 5.0;
   cell.imageView.backgroundColor = [UIColor whiteColor];
   
