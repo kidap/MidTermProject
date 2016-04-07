@@ -34,6 +34,12 @@
 //MARK: Preparation
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
+  [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
+                                                forBarMetrics:UIBarMetricsDefault];
+  self.navigationController.navigationBar.shadowImage = [UIImage new];
+  self.navigationController.navigationBar.translucent = YES;
+  self.navigationController.view.backgroundColor = [UIColor clearColor];
+  
   [self prepareCollectionView];
   
   //Create test data

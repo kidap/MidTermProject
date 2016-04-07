@@ -13,24 +13,30 @@
 #import "AddTripViewController.h"
 #import "DayCollectionViewCell.h"
 
-@interface TripDetailViewController()<UITableViewDelegate,UITableViewDataSource,UICollectionViewDelegate,UICollectionViewDataSource>
+@interface TripDetailViewController()<UICollectionViewDelegate,UICollectionViewDataSource>
 @property (weak, nonatomic) IBOutlet UITableView *dayTableView;
 @property (strong, nonatomic) NSMutableArray *sourceArray;
 @property (strong, nonatomic) IBOutlet UICollectionView *dayCollectionView;
+@property (strong, nonatomic) IBOutlet UIImageView *backgroundImage;
 @end
 @implementation TripDetailViewController
 -(void)viewDidLoad{
   [super viewDidLoad];
   [self prepareView];
-  [self prepareTableView];
+  [self prepareCollectionView];
 }
 -(void)prepareView{
   self.sourceArray = [[NSMutableArray alloc] init];
   UIBarButtonItem *edit = [[UIBarButtonItem alloc] initWithTitle:@"Edit Trip" style:UIBarButtonItemStylePlain target:self action:@selector(editTrip)];
   self.navigationItem.rightBarButtonItem = edit;
   
+  [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
+                                                forBarMetrics:UIBarMetricsDefault];
+  self.navigationController.navigationBar.shadowImage = [UIImage new];
+  self.navigationController.navigationBar.translucent = YES;
+  self.navigationController.view.backgroundColor = [UIColor clearColor];
 }
--(void)prepareTableView{
+-(void)prepareCollectionView{
   self.dayTableView.delegate = self;
   self.dayTableView.dataSource = self;
   self.dayCollectionView.delegate = self;
@@ -44,18 +50,7 @@
     }
   }
 }
-//MARK: Table view delegate
--(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-  return self.sourceArray.count;
-}
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"dayCell" forIndexPath:indexPath];
-  
-  cell.textLabel.text = self.sourceArray[indexPath.row];
-  
-  return cell;
-}
 //MARK: Collection view delegate
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
   return self.sourceArray.count;

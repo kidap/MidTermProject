@@ -14,6 +14,7 @@
 #import "PDTSimpleCalendarViewHeader.h"
 @import MobileCoreServices;
 @import AssetsLibrary;
+@import CoreLocation;
 
 static NSString *dateFormat = @"MM/dd/yyyy";
 
@@ -34,6 +35,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (strong, nonatomic) NSArray *sortedCountries;
 @property (strong, nonatomic) PDTSimpleCalendarViewController *calendarViewController;
 @property (nonatomic, strong) NSMutableArray *customDates;
+@property (strong, nonatomic) CLLocation *photoTakenLocation;
+@property (strong, nonatomic) IBOutlet UILabel *imageUploadLabel;
 @end
 
 @implementation AddTripViewController
@@ -145,6 +148,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 //MARK: Image Picker delegate
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
   [self.imageView setImage: info[@"UIImagePickerControllerOriginalImage"]];
+  self.imageUploadLabel.alpha = 0;
+  
   
   //Get the date whent the photo was taken
   NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
@@ -153,6 +158,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     
     [lib assetForURL:[info objectForKey:UIImagePickerControllerReferenceURL] resultBlock:^(ALAsset *asset) {
       self.photoTakenDate = [asset valueForProperty:ALAssetPropertyDate];
+      self.photoTakenLocation = [asset valueForProperty:ALAssetPropertyLocation];
       dispatch_async(dispatch_get_main_queue(), ^{
         NSLog(@"%@",self.photoTakenDate);
         if (!self.trip){
@@ -160,6 +166,17 @@ static NSString *dateFormat = @"MM/dd/yyyy";
           [self setEndDate:self.photoTakenDate];
         }
       });
+      
+      //Get location from picture
+      CLGeocoder *reverseGeocoder = [[CLGeocoder alloc] init];
+      //Get location of user
+      [reverseGeocoder reverseGeocodeLocation:self.photoTakenLocation completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+        CLPlacemark *currentPlacemark = [placemarks firstObject];
+        dispatch_async(dispatch_get_main_queue(), ^{
+          self.countryTextField.text = currentPlacemark.country;
+          self.cityTextField.text = currentPlacemark.locality;
+        });
+      }];
     } failureBlock:^(NSError *error) {
       NSLog(@"Error in getting phote metadata: %@", error);
     }];
@@ -243,15 +260,15 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
   if (self.dateTag == 1){
     //if (!self.endDate || (self.endDate && date <= self.endDate)){
-      self.startDate = date;
+    self.startDate = date;
     //  [self dismissViewControllerAnimated:YES completion:nil];
     //} else{
     //  NSLog(@"Error");
-
+    
     //}
   } else if (self.dateTag == 2){
     //if (!self.startDate || (self.startDate && date >= self.startDate)){
-      self.endDate = date;
+    self.endDate = date;
     //  [self dismissViewControllerAnimated:YES completion:nil];
     //} else{
     //  NSLog(@"Error");

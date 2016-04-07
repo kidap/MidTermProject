@@ -32,6 +32,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (strong, nonatomic) NSMutableArray<NSString *> *sourceArray;
 @property (strong, nonatomic) NSDate *photoTakenDate;
 @property (strong, nonatomic) CLLocation *photoTakenLocation;
+@property (strong, nonatomic) NSString *photoTakenCountry;
+@property (strong, nonatomic) NSString *photoTakenCity;
 @property (strong, nonatomic) NSSet<NSString *> *tags;
 @property (assign, nonatomic) bool editMode;
 @property (assign, nonatomic) bool imageSelected;
@@ -283,7 +285,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     }
     
     //Save moment with tag and trip
-    
+    //If the moment doesn't exist yet, create moment. Else, update the existing moment
     if (!self.moment){
       [[CoreDataHandler sharedInstance] createMomentWithImage:self.imageView.image
                                                         notes:self.notesTextView.text
@@ -299,7 +301,6 @@ static NSString *dateFormat = @"MM/dd/yyyy";
                                                 tags:tags];
     }
     
-    
     NSString *messageString = [NSString stringWithFormat:@"Added moment to your trip to %@ (%@)",trip.city,trip.dates];
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
     
@@ -314,13 +315,54 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [self presentViewController:alertController animated:YES completion:nil];
     
   } else {
-    NSLog(@"Trip was not determined");
-    NSString *messageString = [NSString stringWithFormat:@"There is no trip on %@",[self convertDateToString:self.photoTakenDate]];
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Moment not saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
     
-    //Add ok button
-    [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil]];
-    [self presentViewController:alertController animated:YES completion:nil];
+//    //Check if there is a trip close to this moment
+//    Trip *closestTrip = [[CoreDataHandler sharedInstance] getTripNearDate:self.photoTakenDate
+//                                                                inCountry:self.photoTakenCountry
+//                                                                     City:self.photoTakenCity];
+//    
+//    //Ask user if they want to add the moment to this trip
+//    if (closestTrip){
+//      NSString *titleString = [NSString stringWithFormat:@"Do you want to add this moment to your trip to %@ (%@)?",trip.city,trip.dates];
+//      NSString *messageString = [NSString stringWithFormat:@""];
+//      UIAlertController *alertController = [UIAlertController alertControllerWithTitle:titleString
+//                                                                               message:messageString
+//                                                                        preferredStyle:UIAlertControllerStyleAlert];
+//      
+//      //Add ok button
+//      [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+//        if (self.delegate){
+//          
+//          //Adjust the dates of the trip
+//          Moment *adjustedMoment;
+//          
+//          //Adjust the days of the trip
+//          
+//          //Add the moment
+//          
+//          [[CoreDataHandler sharedInstance] updateMoment:adjustedMoment
+//                                                   image:self.imageView.image
+//                                                   notes:self.notesTextView.text
+//                                       datePhotoWasTaken:self.photoTakenDate
+//                                                    trip:trip
+//                                                    tags:tags];
+//          
+//          [self.delegate reloadData];
+//        }
+//        [self dismissViewControllerAnimated:YES completion:nil];
+//        [self.navigationController popViewControllerAnimated:YES];
+//      }]];
+//      [self presentViewController:alertController animated:YES completion:nil];
+//      
+//    } else{
+      NSLog(@"Trip was not determined");
+      NSString *messageString = [NSString stringWithFormat:@"There is no trip on %@",[self convertDateToString:self.photoTakenDate]];
+      UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Please create a trip first then reupload this moment" message:messageString preferredStyle:UIAlertControllerStyleAlert];
+      
+      //Add ok button
+      [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil]];
+      [self presentViewController:alertController animated:YES completion:nil];
+//    }
   }
 }
 - (IBAction)cancelButtonTapped:(id)sender {
@@ -426,6 +468,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
       CLPlacemark *currentPlacemark;
       for (CLPlacemark *placemark in placemarks){
         currentPlacemark = placemark;
+        
+        self.photoTakenCountry = currentPlacemark.country;
+        self.photoTakenCity = currentPlacemark.locality;
         
         NSLog(@"subLocality:%@",placemark.subLocality);
         for (NSString *place in placemark.areasOfInterest){

@@ -161,6 +161,15 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 -(NSArray *)getMomentsWithTag:(Tag *)tag{
   return [tag.moments allObjects];
 }
+-(Trip *)getTripNearDate:(NSDate *)date
+               inCountry:(NSString *)country
+                    City:(NSString *)city{
+
+  //Create a predicate which will give me trip closest
+  
+  
+  return nil;
+}
 //MARK: (CREATE) Data methods
 -(Tag *)createTagWithName:(NSString *)tagName{
   //Check if the tag is already existing

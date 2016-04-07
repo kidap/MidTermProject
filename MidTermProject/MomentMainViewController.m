@@ -13,6 +13,7 @@
 #import "Tag.h"
 #import "Moment.h"
 #import "AddMomentViewController.h"
+#import "MomentPhotoViewController.h"
 
 @interface MomentMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource,momentDelegate>
 @property (strong, nonatomic) IBOutlet UICollectionView *collectionView;
@@ -56,6 +57,11 @@
   self.collectionView.delegate = self;
   self.collectionView.dataSource = self;
 }
+-(void)prepareGestures{
+  UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGesture:)];
+  [self.collectionView addGestureRecognizer:longPressGesture];
+}
+//MARK:Collection delegate
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
   return self.sourceArray.count;
 }
@@ -66,6 +72,9 @@
     momentCell.notes.text = self.sourceArray[indexPath.row].notes;
   }
   return momentCell;
+}
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+  [self performSegueWithIdentifier:@"showFullScreenPhoto" sender:self];
 }
 //MARK: Moment delegate
 -(void)reloadData{
@@ -83,12 +92,38 @@
     [self.collectionView reloadData];
   }
 }
+//MARK:Actions
+-(void)longPressGesture:(UILongPressGestureRecognizer *)recognizer{
+  switch (recognizer.state) {
+    case UIGestureRecognizerStateBegan:{
+      
+      [self.collectionView selectItemAtIndexPath:[self.collectionView indexPathForItemAtPoint:[recognizer locationInView:self.collectionView]] animated:YES scrollPosition:UICollectionViewScrollPositionTop];
+      [self performSegueWithIdentifier:@"showEditMoment" sender:self];
+      
+      NSLog(@"Long pressed");
+      break;
+    }
+      //    case UIGestureRecognizerStateChanged:
+      //      [self.collectionView updateInteractiveMovementTargetPosition:[recognizer locationInView:recognizer.view]];
+      //      break;
+      //    case UIGestureRecognizerStateEnded:
+      //      [self.collectionView endInteractiveMovement];
+      //      break;
+    default:
+      break;
+  }
+}
 //MARK: Navigation
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
   if ([segue.identifier isEqualToString:@"showEditMoment"]){
     AddMomentViewController *destinationVC = segue.destinationViewController;
     destinationVC.moment = self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item];
     destinationVC.delegate = self;
+  } else{
+    if ([segue.identifier isEqualToString:@"showFullScreenPhoto"]){
+      MomentPhotoViewController *destinationVC = segue.destinationViewController;
+      destinationVC.image = [UIImage imageWithData:self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item].image ];
+    }
   }
 }
 @end

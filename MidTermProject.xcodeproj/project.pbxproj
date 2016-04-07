@@ -37,6 +37,7 @@
 		A7C71D051CB4AD59002821EE /* PDTSimpleCalendarViewFlowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CFD1CB4AD59002821EE /* PDTSimpleCalendarViewFlowLayout.m */; };
 		A7C71D061CB4AD59002821EE /* PDTSimpleCalendarViewHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71CFF1CB4AD59002821EE /* PDTSimpleCalendarViewHeader.m */; };
 		A7C71D071CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71D011CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.m */; };
+		A7C71D301CB60561002821EE /* MomentPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71D2F1CB60561002821EE /* MomentPhotoViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,6 +97,8 @@
 		A7C71CFF1CB4AD59002821EE /* PDTSimpleCalendarViewHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDTSimpleCalendarViewHeader.m; sourceTree = "<group>"; };
 		A7C71D001CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDTSimpleCalendarViewWeekdayHeader.h; sourceTree = "<group>"; };
 		A7C71D011CB4AD59002821EE /* PDTSimpleCalendarViewWeekdayHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDTSimpleCalendarViewWeekdayHeader.m; sourceTree = "<group>"; };
+		A7C71D2E1CB60561002821EE /* MomentPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MomentPhotoViewController.h; sourceTree = "<group>"; };
+		A7C71D2F1CB60561002821EE /* MomentPhotoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MomentPhotoViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,6 +198,8 @@
 				A7C71C7B1CB2F85E002821EE /* MomentMainViewController.m */,
 				A7C71C971CB30DE1002821EE /* AddMomentViewController.h */,
 				A7C71C981CB30DE1002821EE /* AddMomentViewController.m */,
+				A7C71D2E1CB60561002821EE /* MomentPhotoViewController.h */,
+				A7C71D2F1CB60561002821EE /* MomentPhotoViewController.m */,
 			);
 			name = Moment;
 			sourceTree = "<group>";
@@ -352,6 +357,7 @@
 				A7C71D061CB4AD59002821EE /* PDTSimpleCalendarViewHeader.m in Sources */,
 				A7C71CF41CB46B4D002821EE /* Trip.m in Sources */,
 				A7C71C991CB30DE1002821EE /* AddMomentViewController.m in Sources */,
+				A7C71D301CB60561002821EE /* MomentPhotoViewController.m in Sources */,
 				A7C71C651CB2F29B002821EE /* CoreDataHandler.m in Sources */,
 				A7C71C9D1CB313EB002821EE /* WatsonVisualRecognition.m in Sources */,
 				A7C71CE21CB4519A002821EE /* DayCollectionViewCell.m in Sources */,
