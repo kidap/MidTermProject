@@ -39,8 +39,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (strong, nonatomic) PDTSimpleCalendarViewController *calendarViewController;
 @property (nonatomic, strong) NSMutableArray *customDates;
 @property (strong, nonatomic) CLLocation *photoTakenLocation;
-@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorViewCountry;
-@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorViewCity;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorViewCountry;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicatorViewCity;
 @end
 
 @implementation AddTripViewController
@@ -415,10 +415,16 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 -(void)setStartDate:(NSDate *)date{
   _startDate = date;
   self.startDateTextField.text = [self convertDateToString:date];
+  
+  //Highlight in calendar
+  [self.customDates addObject:date];
 }
 -(void)setEndDate:(NSDate *)date{
   _endDate = date;
   self.endDateTextField.text = [self convertDateToString:date];
+  
+  //Highlight in calendar
+  [self.customDates addObject:date];
 }
 -(void)displayImagePicker{
   UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];

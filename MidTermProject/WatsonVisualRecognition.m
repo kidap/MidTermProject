@@ -90,13 +90,12 @@ static NSString *password = @"DS2cavB6d4MW";
       NSArray *scores = image[@"scores"];
       for (int x = 0; x < scores.count ; x++){
         NSDictionary *score = scores[x];
+        if (x==3 || [score[@"score"] intValue] > 50){ //Return only scores higher than 50
+          break;
+        }
         NSLog(@"%@",score[@"name"]);
         NSLog(@"%@",score[@"score"]);
         [returnSet addObject:score[@"name"]];
-        
-        if (x==2){
-          break;
-        }
       }
       completionHandler(YES,returnSet);
     } else{

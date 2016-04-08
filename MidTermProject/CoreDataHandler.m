@@ -44,6 +44,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [_managedObjectContext setPersistentStoreCoordinator:coordinator];
   }
   
+  _managedObjectContext.undoManager = nil; //For performance
   return _managedObjectContext;
 }
 -(NSManagedObjectModel *)managedObjectModel{
@@ -73,7 +74,6 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 }
 -(void)dealloc{
 }
-
 - (void)saveContext {
   NSManagedObjectContext *managedObjectContext = self.managedObjectContext;
   if (managedObjectContext != nil) {
@@ -84,10 +84,28 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     }
   }
 }
+
 //MARK: (GET) Data methods
 -(NSArray *)getAllTrips{
   NSError *error = nil;
   NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
+  fetchRequest.includesPropertyValues = NO;
+  [fetchRequest setFetchBatchSize:3];
+  [fetchRequest setPropertiesToFetch:@[@"city",@"dates",@"startDate",@"endDate",@"totalDays",@"coverImage",@"country",]];
+  
+  //Sort results
+  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:NO];
+  fetchRequest.sortDescriptors = @[sortDescriptor];
+  
+  return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+}
+
+-(NSArray *)getAllTripsInDict{
+  NSError *error = nil;
+  NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Trip"];
+  fetchRequest.includesPropertyValues = YES;
+  [fetchRequest setFetchBatchSize:3];
+  [fetchRequest setResultType:NSDictionaryResultType];
   
   return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
   
@@ -100,16 +118,26 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat:@"moments.@count == 0"];
   fetchRequest.predicate = predicate;
+  //fetchRequest.includesPropertyValues = NO;
   
   NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
   for (Tag *tag in tags){
-  [self.managedObjectContext deleteObject:tag];
+    [self.managedObjectContext deleteObject:tag];
   }
-
+  
   //Get all tags with moments
   fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
+//  fetchRequest.includesPropertyValues = NO;
+  [fetchRequest setFetchBatchSize:10];
+//  [fetchRequest setResultType:NSDictionaryResultType];
   
   return [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+}
+-(NSInteger)getTagCount:(NSString *)tagName{
+  Tag *tag = [self getTagWithName:tagName];
+  NSInteger count = tag.moments.count;
+  [self.managedObjectContext refreshObject:tag mergeChanges:NO];
+  return count;
 }
 -(Tag *)getTagWithName:(NSString *)tagName{
   NSError *error= nil;
@@ -118,6 +146,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   
   NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",fieldName,tagName];
   fetchRequest.predicate = predicate;
+  [fetchRequest setFetchBatchSize:1];
   
   NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
   
@@ -133,6 +162,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K <= %@) AND (%K >= %@)",fieldName1,date,fieldName2,date];
     fetchRequest.predicate = predicate;
+    [fetchRequest setFetchBatchSize:1];
     
     NSLog(@"Looking for a trip on %@",date);
     NSArray *trips = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
@@ -146,17 +176,18 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   NSString *fieldName = @"tagName";
   //Get all tags
   NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tag"];
-  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@",fieldName,tagName];
+  NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K like %@",fieldName,[NSString stringWithFormat:@"*%@*",tagName]];
   fetchRequest.predicate = predicate;
+  [fetchRequest setFetchBatchSize:10];
   
   //Get all memories using the tags
   NSArray *tags = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-  NSMutableArray *moments = [[NSMutableArray alloc] init];
+  NSMutableSet *moments = [[NSMutableSet alloc] init];
   for (Tag *tag in tags){
     [moments addObjectsFromArray:[tag.moments allObjects]];
   }
   
-  return moments;
+  return [moments allObjects];
 }
 -(NSArray *)getMomentsWithTag:(Tag *)tag{
   return [tag.moments allObjects];
@@ -164,11 +195,15 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 -(Trip *)getTripNearDate:(NSDate *)date
                inCountry:(NSString *)country
                     City:(NSString *)city{
-
+  
   //Create a predicate which will give me trip closest
   
   
   return nil;
+}
+-(NSManagedObject *)existingObjectWithID:(NSManagedObjectID *)objectID
+                                   error:(NSError **)error;{
+  return [self.managedObjectContext existingObjectWithID:objectID error:error];
 }
 //MARK: (CREATE) Data methods
 -(Tag *)createTagWithName:(NSString *)tagName{
@@ -227,9 +262,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   //unsigned int flags = NSCalendarUnitSecond | NSCalendarUnitMinute | NSCalendarUnitHour;
   NSCalendar* calendar = [NSCalendar currentCalendar];
   NSDateComponents *components = [calendar components:NSUIntegerMax fromDate:startDate];
-    components.hour = 00;
-    components.minute = 00;
-    components.second = 00;
+  components.hour = 00;
+  components.minute = 00;
+  components.second = 00;
   //  newTrip.startDate = [[NSCalendar currentCalendar]dateFromComponents:components ];
   newTrip.startDate = [startDate dateByAddingTimeInterval:-components.hour*components.minute*components.minute];
   
@@ -363,6 +398,10 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 }
 
 //MARK: (DELETE) Data methods
+-(void)deleteMoment:(Moment *)moment{
+  [self.managedObjectContext deleteObject:moment];
+  [self saveContext];
+}
 -(void)deleteTrip:(Trip *)trip{
   [self.managedObjectContext deleteObject:trip];
   [self saveContext];
@@ -376,5 +415,15 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   NSDateFormatter *f = [[NSDateFormatter alloc] init];
   [f setDateFormat:dateFormat];
   return [f dateFromString:dateString];
+}
+//MARK: Refresh
+-(void)refreshObject:(NSManagedObject *)object{
+  [self.managedObjectContext refreshObject:object mergeChanges:YES];
+}
+-(void)logRegisteredObjects{
+  NSLog(@"%lu",self.managedObjectContext.registeredObjects.count);
+}
+-(void)reset{
+  [self.managedObjectContext reset];
 }
 @end

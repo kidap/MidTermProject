@@ -14,4 +14,5 @@
 @property (strong, nonatomic) Trip *trip;
 @property (strong, nonatomic) NSArray<Moment*> *moments;
 @property (assign, nonatomic) int day;
+@property (copy, nonatomic) NSString *navTitle;
 @end

@@ -9,5 +9,4 @@
 #import "DayCollectionViewCell.h"
 
 @implementation DayCollectionViewCell
-
 @end

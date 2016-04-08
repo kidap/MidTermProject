@@ -13,13 +13,16 @@
 #import "Moment.h"
 #import "TripDetailViewController.h"
 #import "MomentMainViewController.h"
+#import "AddMomentViewController.h"
 @import CoreData;
 
 
-@interface TripMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource>
+@interface TripMainViewController()<UICollectionViewDelegate, UICollectionViewDataSource,momentDelegate>
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (strong, nonatomic) NSArray<Trip *> *sourceArray;
 @property (strong, nonatomic) NSArray<Moment *> *momentsArray;
+@property (copy,nonatomic)NSString *searchString;
+@property (strong, nonatomic)Trip * selectedTrip;
 @end
 
 @implementation TripMainViewController
@@ -28,38 +31,41 @@
   [self prepareView];
   [self prepareDelegate];
 }
--(void)viewDidAppear:(BOOL)animated{
+-(void)viewWillAppear:(BOOL)animated{
   [self prepareCollectionView];
 }
 //MARK: Preparation
 -(void)prepareView{
   self.sourceArray = [[NSArray alloc] init];
-//  [self.navigationController.navigationBar setBackgroundImage:[UIImage new]
-//                                                forBarMetrics:UIBarMetricsDefault];
   self.navigationController.navigationBar.shadowImage = [UIImage new];
   self.navigationController.navigationBar.translucent = YES;
   self.navigationController.view.backgroundColor = [UIColor colorWithRed:0 green:64 blue:128 alpha:1.01];
   
   [self prepareCollectionView];
   
-  //Create test data
-  if (self.sourceArray.count == 0){
-    [[CoreDataHandler sharedInstance] createTripWithCity:@"Toronto"
-                                                 country:@"Canada"
-                                               startDate:[NSDate date]
-                                                 endDate:[NSDate date]
-                                                   image:[UIImage imageNamed:@"Toronto"]];
-  }
+  self.searchString = @"";
+  
+  NSLog(@"Trip Main view did load");
+  [[CoreDataHandler sharedInstance] logRegisteredObjects];
 }
 -(void)prepareDelegate{
   self.collectionView.delegate = self;
   self.collectionView.dataSource = self;
 }
 -(void)prepareCollectionView{
+  //  self.sourceArray = [[CoreDataHandler sharedInstance] getAllTripsInDict];
+  //  NSLog(@"Test%@",self.sourceArray);
+  //  NSLog(@"TEst");
+  //  self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
+  //  //Sort by date
+  //  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:NO];
+  //  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
+  //  [self.collectionView reloadData];
+  
+  [self reloadData];
+}
+-(void)reloadData{
   self.sourceArray = [[CoreDataHandler sharedInstance] getAllTrips];
-  //Sort by date
-  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:NO];
-  self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
   [self.collectionView reloadData];
 }
 //MARK: Table view delegate
@@ -78,13 +84,12 @@
   }
   tripCell.datesLabel.text  = self.sourceArray[indexPath.row].dates;
   
-  tripCell.imageView.layer.borderWidth = 0.5;
+  tripCell.imageView.layer.borderWidth = 1;
   tripCell.imageView.layer.borderColor  = [UIColor grayColor].CGColor;
-  
   tripCell.layer.shadowRadius = 3.0f;
   tripCell.layer.shadowColor = [UIColor grayColor].CGColor;
   tripCell.layer.shadowOffset = CGSizeMake(0.0f, 1.0f);
-  tripCell.layer.shadowOpacity = 0.5f;
+  tripCell.layer.shadowOpacity = 0.8f;
   tripCell.layer.masksToBounds = NO;
   tripCell.backgroundColor = [UIColor whiteColor];
   
@@ -99,7 +104,8 @@
   }];
   //Add ok button
   [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-    self.momentsArray = [[CoreDataHandler sharedInstance] getMomentsWithTagName:alertController.textFields[0].text];
+    self.searchString = alertController.textFields[0].text;
+    self.momentsArray = [[CoreDataHandler sharedInstance] getMomentsWithTagName:self.searchString];
     if (self.momentsArray.count > 0){
       [self performSegueWithIdentifier:@"showMoments" sender:self];
     } else{
@@ -118,7 +124,9 @@
   
   [self presentViewController:alertController animated:YES completion:nil];
 }
-
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+  [self performSegueWithIdentifier:@"showTripMoments" sender:self];
+}
 //MARK: Navigation
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
   if ([segue.identifier isEqualToString:@"showTripMoments"]){
@@ -129,7 +137,13 @@
   }  else if ([segue.identifier isEqualToString:@"showMoments"]){
     MomentMainViewController *destinationVC = segue.destinationViewController;
     destinationVC.moments = [self.momentsArray copy];
+    destinationVC.navTitle = self.searchString;
     self.momentsArray = nil;
+  }  else if ([segue.identifier isEqualToString:@"addNewMoment"]){
+    AddMomentViewController *destinationVC = (AddMomentViewController *)segue.destinationViewController;
+    destinationVC.delegate = self;
   }
+  
+  
 }
 @end

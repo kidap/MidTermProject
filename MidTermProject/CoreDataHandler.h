@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+@class NSManagedObject;
 @class NSManagedObjectContext;
 @class NSManagedObjectModel;
 @class NSPersistentStoreCoordinator;
 @class NSFetchedResultsController;
+@class NSManagedObjectID;
 @class Moment;
 @class Tag;
 @class UIImage;
@@ -26,6 +28,7 @@
 
 //Get
 -(NSArray *)getAllTrips;
+-(NSArray *)getAllTripsInDict;
 -(NSArray *)getAllTags;
 -(Tag *)getTagWithName:(NSString *)tagName;
 -(NSArray *)getMomentsWithTagName:(NSString *)tagName;
@@ -34,6 +37,8 @@
 -(Trip *)getTripNearDate:(NSDate *)date
                inCountry:(NSString *)country
                     City:(NSString *)city;
+-(NSManagedObject *)existingObjectWithID:(NSManagedObjectID *)objectID
+                                   error:(NSError **)error;
 //Create
 -(void)createTripWithCity:(NSString*)city
                   country:(NSString*)country
@@ -63,4 +68,9 @@
                tags:(NSSet<Tag *>*)tags;
 //Delete
 -(void)deleteTrip:(Trip *)trip;
+-(void)deleteMoment:(Moment *)moment;
+//Refresh
+-(void)refreshObject:(NSManagedObject *)object;
+-(void)logRegisteredObjects;
+-(void)reset;
 @end

@@ -43,7 +43,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 @property (weak, nonatomic) IBOutlet UINavigationBar *customNavigationBar;
 @property (weak, nonatomic) IBOutlet UIView *watsonView;
 @property (assign, nonatomic) bool isWatsonThinking;
-@property (strong, nonatomic) IBOutlet UIView *watsonNotificationView;
+@property (weak, nonatomic) IBOutlet UIView *watsonNotificationView;
+@property (weak, nonatomic) IBOutlet UILabel *notesBackgroundLabel;
 @end
 
 @implementation AddMomentViewController
@@ -101,6 +102,12 @@ static NSString *dateFormat = @"MM/dd/yyyy";
       }
     }
   }
+  
+  if (![self.notesTextView.text isEqualToString:@""]){
+    self.notesBackgroundLabel.alpha = 0;
+  } else{
+    self.notesBackgroundLabel.alpha = 1;
+  }
 }
 //MARK: Preparation
 -(void)prepareView{
@@ -147,8 +154,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   }
 }
 -(void)prepareDelegates{
-//  self.tableView.delegate = self;
-//  self.tableView.dataSource = self;
+  //  self.tableView.delegate = self;
+  //  self.tableView.dataSource = self;
   self.notesTextView.delegate = self;
   self.collectionView.delegate = self;
   self.collectionView.dataSource = self;
@@ -220,6 +227,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
       
       //Update tags shown on view
       dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"Adding Tags");
         for (int x = 0; x<=tagsArray.count - 1;x++){
           NSString *tag = tagsArray[x];
           [self addTagWithName:tag];
@@ -306,12 +314,15 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 }
 //MARK:Actions
 - (IBAction)saveMoment:(id)sender {
+  [self.notesTextView resignFirstResponder];
   
   Trip *trip = [[CoreDataHandler sharedInstance] getTripWithDate:self.photoTakenDate];
   NSLog(@"Saving to Country:%@, City:%@",trip.country,trip.city);
   
   if (trip){
     NSMutableSet *tags = [[NSMutableSet alloc] init];
+    NSString *tripCity = trip.city;
+    NSString *tripDates = trip.dates;
     
     //Get all selected rows and create(retrieve is there is already an existing) a tag
     for (NSIndexPath *indexPath in self.collectionView.indexPathsForSelectedItems){
@@ -327,6 +338,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
                                             datePhotoWasTaken:self.photoTakenDate
                                                          trip:trip
                                                          tags:tags];
+      [[CoreDataHandler sharedInstance] reset];
     } else{
       [[CoreDataHandler sharedInstance] updateMoment:self.moment
                                                image:self.imageView.image
@@ -336,7 +348,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
                                                 tags:tags];
     }
     
-    NSString *messageString = [NSString stringWithFormat:@"Added moment to your trip to %@ (%@)",trip.city,trip.dates];
+    NSString *messageString = [NSString stringWithFormat:@"Added moment to your trip to %@ (%@)",tripCity,tripDates];
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Saved" message:messageString preferredStyle:UIAlertControllerStyleAlert];
     
     //Add ok button
@@ -399,6 +411,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
     [self presentViewController:alertController animated:YES completion:nil];
     //    }
   }
+  NSLog(@"Saved moment");
+  [[CoreDataHandler sharedInstance] logRegisteredObjects];
 }
 - (IBAction)cancelButtonTapped:(id)sender {
   [self dismissViewControllerAnimated:YES completion:nil];
@@ -428,22 +442,26 @@ static NSString *dateFormat = @"MM/dd/yyyy";
 //MARK: Helper methods
 -(void)addTagWithName:(NSString *)name{
   NSString *tagName = [[name lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""];
-  NSIndexPath *newIndexPath;
-  if(self.sourceArray.count != 0){
-    newIndexPath = [NSIndexPath indexPathForRow:self.sourceArray.count inSection:0];
-    [self.sourceArray insertObject:tagName atIndex:newIndexPath.row];
+  
+  if(![self.sourceArray containsObject:tagName] && tagName != nil){
+    NSIndexPath *newIndexPath;
+    if(self.sourceArray.count != 0){
+      newIndexPath = [NSIndexPath indexPathForRow:self.sourceArray.count inSection:0];
+      [self.sourceArray insertObject:tagName atIndex:newIndexPath.row];
+    } else{
+      newIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+      [self.sourceArray addObject:tagName];
+    }
+    
+    //Add tag and select it by default
+    [self.collectionView insertItemsAtIndexPaths:@[newIndexPath]];
+    
+    //Default bg color or cell
+    TagCollectionViewCell *cell = (TagCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:newIndexPath];
+    cell.contentView.backgroundColor=[UIColor whiteColor];
   } else{
-    newIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    [self.sourceArray addObject:tagName];
+    NSLog(@"%@",tagName);
   }
-  
- //Add tag and select it by default
-  [self.collectionView insertItemsAtIndexPaths:@[newIndexPath]];
-  
-  //Default bg color or cell
-  TagCollectionViewCell *cell = (TagCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:newIndexPath];
-  cell.contentView.backgroundColor=[UIColor whiteColor];
-
 }
 -(int)getDayFromImage:(UIImage *)image trip:(Trip *)trip{
   return 1;
@@ -523,6 +541,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
         self.photoTakenCity = currentPlacemark.locality;
         
         NSLog(@"subLocality:%@",placemark.subLocality);
+        [self addTagWithName:placemark.subLocality];
         for (NSString *place in placemark.areasOfInterest){
           //Split text if there is a /
           NSArray *splitPlaces = [place componentsSeparatedByString:@"/"];
@@ -568,4 +587,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   [f setDateFormat:dateFormat];
   return [f dateFromString:dateString];
 }
+- (IBAction)deleteButton:(id)sender {
+  [[CoreDataHandler sharedInstance] deleteMoment:self.moment];
+}
+
+
 @end

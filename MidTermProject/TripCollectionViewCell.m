@@ -9,5 +9,4 @@
 #import "TripCollectionViewCell.h"
 
 @implementation TripCollectionViewCell
-
 @end

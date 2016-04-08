@@ -12,12 +12,17 @@
 #import "MomentMainViewController.h"
 #import "AddTripViewController.h"
 #import "DayCollectionViewCell.h"
+#import "CoreDataHandler.h"
+
+
+static NSString *dateFormat = @"MM/dd/yyyy HH:mm:ss";
 
 @interface TripDetailViewController()<UICollectionViewDelegate,UICollectionViewDataSource>
 @property (weak, nonatomic) IBOutlet UITableView *dayTableView;
 @property (strong, nonatomic) NSMutableArray *sourceArray;
-@property (strong, nonatomic) IBOutlet UICollectionView *dayCollectionView;
-@property (strong, nonatomic) IBOutlet UIImageView *backgroundImage;
+@property (weak, nonatomic) IBOutlet UICollectionView *dayCollectionView;
+@property (weak, nonatomic) IBOutlet UIImageView *backgroundImage;
+@property (strong, nonatomic) NSSet <Moment *>*moments;
 @end
 @implementation TripDetailViewController
 -(void)viewDidLoad{
@@ -25,10 +30,17 @@
   [self prepareView];
   [self prepareCollectionView];
 }
+-(void)viewDidAppear:(BOOL)animated{
+  [[CoreDataHandler sharedInstance] refreshObject:self.trip];
+}
 -(void)prepareView{
   self.sourceArray = [[NSMutableArray alloc] init];
   UIBarButtonItem *edit = [[UIBarButtonItem alloc] initWithTitle:@"Edit Trip" style:UIBarButtonItemStylePlain target:self action:@selector(editTrip)];
   self.navigationItem.rightBarButtonItem = edit;
+  self.navigationItem.title = [NSString stringWithFormat:@"%@, %@",self.trip.city,self.trip.country];
+  
+  //from Core Data Handler
+  self.moments = self.trip.moments;
 }
 -(void)prepareCollectionView{
   self.dayTableView.delegate = self;
@@ -43,6 +55,9 @@
       [self.sourceArray addObject:[NSString stringWithFormat:@"All"]];
     }
   }
+  
+  NSLog(@"Trip Detail view did load");
+  [[CoreDataHandler sharedInstance] logRegisteredObjects];
 }
 
 //MARK: Collection view delegate
@@ -58,17 +73,28 @@
   
   //Image - Filter based on day selected
   int currentDay = (int)indexPath.row;
-  NSSet <Moment *>*moments = self.trip.moments;
   if (currentDay != 0){
-    NSString *fieldName = @"day";
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %i",fieldName,currentDay];
-    Moment *moment = [[[moments allObjects] filteredArrayUsingPredicate:predicate] lastObject];
+//    NSString *fieldName = @"day";
+//    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %i",fieldName,currentDay];
+//    Moment *moment = [[[self.moments allObjects] filteredArrayUsingPredicate:predicate] lastObject];
+    //day 1 = start date + 1
+    //day 2 = start date + 1
+    NSString *fieldName = @"date";
+    int day = currentDay - 1;
+    NSDate *newDateStartOfDay = [self.trip.startDate dateByAddingTimeInterval:60*60*24*day];
+    NSDate *newDateEndOfDay = [self.trip.startDate dateByAddingTimeInterval:(60*60*24*(day+1))-1];
+   NSLog(@"Start:%@,New:%@,New:%@",[self convertDateToString: self.trip.startDate],
+         [self convertDateToString:newDateStartOfDay],[self convertDateToString:newDateEndOfDay]);
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"(%K >= %@) AND (%K <= %@)",fieldName,newDateStartOfDay,fieldName,newDateEndOfDay];
+                              
+    Moment *moment = [[[self.moments allObjects] filteredArrayUsingPredicate:predicate] lastObject];
+    NSLog(@"Day %D:%@",currentDay,moment.date);
+    NSLog(@"Moment date%@",[self convertDateToString: moment.date]);
     cell.imageView.image = [UIImage imageWithData:moment.image];
+    [[CoreDataHandler sharedInstance] refreshObject:moment];
   } else{
-    cell.imageView.image = [UIImage imageWithData: [moments anyObject].image];
+    cell.imageView.image = [UIImage imageWithData: [self.moments anyObject].image];
   }
-  
-  //Image properties
   cell.imageView.layer.borderWidth  = 0.5;
   cell.imageView.layer.borderColor  = [UIColor colorWithRed:0.333 green:0.243 blue:0.322 alpha:1].CGColor;//[UIColor lightGrayColor].CGColor;
   cell.imageView.layer.cornerRadius  = 5.0;
@@ -85,7 +111,6 @@
   }
   
 }
-
 //MARK: Action
 -(void)editTrip{
   [self performSegueWithIdentifier:@"showEditTrip" sender:self];
@@ -97,11 +122,22 @@
     destinationVC.trip = self.trip;
     //    destinationVC.day = (int)self.dayTableView.indexPathForSelectedRow.row;
     //    NSLog(@"Day selected:%ld",self.dayTableView.indexPathForSelectedRow.row);
+    
     destinationVC.day = (int)[self.dayCollectionView.indexPathsForSelectedItems firstObject].item;
     NSLog(@"Day selected:%ld",[self.dayCollectionView.indexPathsForSelectedItems firstObject].item);
   } else if ([segue.identifier isEqualToString:@"showEditTrip"]){
     AddTripViewController *destinationVC = segue.destinationViewController;
     destinationVC.trip = self.trip;
   }
+}
+-(NSString *)convertDateToString:(NSDate *)date{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  return [f stringFromDate:date];
+}
+-(NSDate *)convertStringToDate:(NSString *)dateString{
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:dateFormat];
+  return [f dateFromString:dateString];
 }
 @end

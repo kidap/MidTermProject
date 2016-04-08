@@ -208,18 +208,18 @@
 		A7C71C7D1CB2FB0B002821EE /* Subclass */ = {
 			isa = PBXGroup;
 			children = (
-				A7C71CE31CB46B4D002821EE /* Tag+CoreDataProperties.h */,
-				A7C71CE41CB46B4D002821EE /* Tag+CoreDataProperties.m */,
-				A7C71CE51CB46B4D002821EE /* Tag.h */,
-				A7C71CE61CB46B4D002821EE /* Tag.m */,
-				A7C71CE71CB46B4D002821EE /* Moment+CoreDataProperties.h */,
-				A7C71CE81CB46B4D002821EE /* Moment+CoreDataProperties.m */,
-				A7C71CE91CB46B4D002821EE /* Moment.h */,
-				A7C71CEA1CB46B4D002821EE /* Moment.m */,
 				A7C71CEB1CB46B4D002821EE /* Trip+CoreDataProperties.h */,
 				A7C71CEC1CB46B4D002821EE /* Trip+CoreDataProperties.m */,
 				A7C71CED1CB46B4D002821EE /* Trip.h */,
 				A7C71CEE1CB46B4D002821EE /* Trip.m */,
+				A7C71CE71CB46B4D002821EE /* Moment+CoreDataProperties.h */,
+				A7C71CE81CB46B4D002821EE /* Moment+CoreDataProperties.m */,
+				A7C71CE91CB46B4D002821EE /* Moment.h */,
+				A7C71CEA1CB46B4D002821EE /* Moment.m */,
+				A7C71CE31CB46B4D002821EE /* Tag+CoreDataProperties.h */,
+				A7C71CE41CB46B4D002821EE /* Tag+CoreDataProperties.m */,
+				A7C71CE51CB46B4D002821EE /* Tag.h */,
+				A7C71CE61CB46B4D002821EE /* Tag.m */,
 			);
 			name = Subclass;
 			sourceTree = "<group>";
@@ -237,10 +237,10 @@
 			children = (
 				A7C71C941CB303D6002821EE /* TripCollectionViewCell.h */,
 				A7C71C951CB303D6002821EE /* TripCollectionViewCell.m */,
-				A7C71CA11CB338A8002821EE /* MomentCollectionViewCell.h */,
-				A7C71CA21CB338A8002821EE /* MomentCollectionViewCell.m */,
 				A7C71CE01CB4519A002821EE /* DayCollectionViewCell.h */,
 				A7C71CE11CB4519A002821EE /* DayCollectionViewCell.m */,
+				A7C71CA11CB338A8002821EE /* MomentCollectionViewCell.h */,
+				A7C71CA21CB338A8002821EE /* MomentCollectionViewCell.m */,
 				A7C71D311CB610AA002821EE /* TagCollectionViewCell.h */,
 				A7C71D321CB610AA002821EE /* TagCollectionViewCell.m */,
 			);
