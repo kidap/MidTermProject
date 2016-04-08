@@ -68,7 +68,7 @@ static NSString *dateFormat = @"MM/dd/yyyy HH:mm:ss";
   }
   
   //Sort by date ASCENDING
-  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:YES];
+  NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"date" ascending:NO];
   self.sourceArray = [self.sourceArray sortedArrayUsingDescriptors:@[sortDescriptor]];
   
   //Set title of the navigation bar
@@ -201,6 +201,7 @@ static NSString *dateFormat = @"MM/dd/yyyy HH:mm:ss";
     if ([segue.identifier isEqualToString:@"showFullScreenPhoto"]){
       MomentPhotoViewController *destinationVC = segue.destinationViewController;
       destinationVC.image = [UIImage imageWithData:self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item].image ];
+      destinationVC.notes = self.sourceArray[[self.collectionView.indexPathsForSelectedItems firstObject].item].notes;
     }
   }
 }

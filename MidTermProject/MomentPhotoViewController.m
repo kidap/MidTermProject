@@ -20,6 +20,10 @@
   [super viewDidLoad];
   // Do any additional setup after loading the view.
   [self setupScrollView];
+//  UIBarButtonItem *editToggleButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStylePlain target:self action:@selector(sharePhoto:)];
+  UIBarButtonItem *editToggleButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(sharePhoto:)];
+  self.navigationItem.rightBarButtonItem = editToggleButton;
+  
 }
 -(void)viewDidAppear:(BOOL)animated{
   [self addElementsToScrollView];
@@ -60,6 +64,26 @@
     [self.scrollView setContentOffset:(CGPointMake(CGRectGetMinX(self.scrollView.bounds),
                                                    ((self.scrollView.contentSize.height - CGRectGetHeight(self.scrollView.bounds)) / 2)-40)) animated:YES];
   }
+}
+-(void)sharePhoto:(id)sender{
+  NSString *textToShare = @"notes";
+  UIImage *myImage = self.image;
+  
+  NSArray *objectsToShare = @[textToShare, myImage];
+  
+  UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:objectsToShare applicationActivities:nil];
+  
+  NSArray *excludeActivities = @[//UIActivityTypeAirDrop,
+                                 //UIActivityTypePrint,
+                                 UIActivityTypeAssignToContact,
+                                 UIActivityTypeSaveToCameraRoll,
+                                 UIActivityTypeAddToReadingList,
+                                 UIActivityTypePostToFlickr,
+                                 UIActivityTypePostToVimeo];
+  
+  activityVC.excludedActivityTypes = excludeActivities;
+  
+  [self presentViewController:activityVC animated:YES completion:nil];
 }
 
 @end

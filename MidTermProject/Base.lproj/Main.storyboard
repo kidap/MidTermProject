@@ -647,8 +647,8 @@
                                         </variation>
                                     </label>
                                     <button opaque="NO" alpha="0.0" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fdH-QK-rTA">
-                                        <rect key="frame" x="0.0" y="642" width="16" height="30"/>
-                                        <state key="normal" title="Button"/>
+                                        <rect key="frame" x="0.0" y="642" width="32" height="30"/>
+                                        <state key="normal" title="D"/>
                                         <connections>
                                             <action selector="deleteButton:" destination="0uW-Dz-2ez" eventType="touchUpInside" id="eNb-61-1An"/>
                                         </connections>

@@ -57,7 +57,8 @@ static NSString *password = @"DS2cavB6d4MW";
   NSMutableData *body = [NSMutableData data];
   
   // add image data
-  UIImage *imageToPost = image;
+//  UIImage *imageToPost = image;
+  UIImage *imageToPost = [self imageWithImage:image convertToSize:CGSizeMake(500, 500)];
   NSData *imageData = UIImageJPEGRepresentation(imageToPost, 1.0);
   if (imageData) {
     [body appendData:[[NSString stringWithFormat:@"--%@\r\n", BoundaryConstant] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -107,6 +108,13 @@ static NSString *password = @"DS2cavB6d4MW";
   NSLog(@"Connecting to Watson...");
   
 }
-
+- (UIImage *)imageWithImage:(UIImage *)image convertToSize:(CGSize)size {
+  UIGraphicsBeginImageContext(size);
+  [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
+  UIImage *destImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  NSLog(@"Image resized");
+  return destImage;
+}
 
 @end

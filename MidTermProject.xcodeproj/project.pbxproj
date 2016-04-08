@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A767D2001CB7FF06007F2A60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A767D1FF1CB7FF06007F2A60 /* Assets.xcassets */; };
 		A7C71C4C1CB2F1D3002821EE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71C4B1CB2F1D3002821EE /* main.m */; };
 		A7C71C4F1CB2F1D3002821EE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71C4E1CB2F1D3002821EE /* AppDelegate.m */; };
 		A7C71C551CB2F1D3002821EE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A7C71C531CB2F1D3002821EE /* Main.storyboard */; };
-		A7C71C571CB2F1D4002821EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A7C71C561CB2F1D4002821EE /* Assets.xcassets */; };
 		A7C71C5A1CB2F1D4002821EE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A7C71C581CB2F1D4002821EE /* LaunchScreen.storyboard */; };
 		A7C71C651CB2F29B002821EE /* CoreDataHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C71C641CB2F29B002821EE /* CoreDataHandler.m */; };
 		A7C71C6B1CB2F350002821EE /* MidTerm.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A7C71C691CB2F350002821EE /* MidTerm.xcdatamodeld */; };
@@ -42,12 +42,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A767D1FF1CB7FF06007F2A60 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A7C71C471CB2F1D3002821EE /* MidTermProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MidTermProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A7C71C4B1CB2F1D3002821EE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A7C71C4D1CB2F1D3002821EE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A7C71C4E1CB2F1D3002821EE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A7C71C541CB2F1D3002821EE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		A7C71C561CB2F1D4002821EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A7C71C591CB2F1D4002821EE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A7C71C5B1CB2F1D4002821EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A7C71C631CB2F29B002821EE /* CoreDataHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataHandler.h; sourceTree = "<group>"; };
@@ -143,9 +143,9 @@
 				A7C71C4D1CB2F1D3002821EE /* AppDelegate.h */,
 				A7C71C4E1CB2F1D3002821EE /* AppDelegate.m */,
 				A7C71C531CB2F1D3002821EE /* Main.storyboard */,
-				A7C71C561CB2F1D4002821EE /* Assets.xcassets */,
 				A7C71C581CB2F1D4002821EE /* LaunchScreen.storyboard */,
 				A7C71C5B1CB2F1D4002821EE /* Info.plist */,
+				A767D1FF1CB7FF06007F2A60 /* Assets.xcassets */,
 				A7C71CF51CB4AD50002821EE /* PDTSimpleCalendar */,
 				A7C71C4A1CB2F1D3002821EE /* Supporting Files */,
 			);
@@ -363,7 +363,7 @@
 			files = (
 				A7C71D021CB4AD59002821EE /* Info.plist in Resources */,
 				A7C71C5A1CB2F1D4002821EE /* LaunchScreen.storyboard in Resources */,
-				A7C71C571CB2F1D4002821EE /* Assets.xcassets in Resources */,
+				A767D2001CB7FF06007F2A60 /* Assets.xcassets in Resources */,
 				A7C71C551CB2F1D3002821EE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

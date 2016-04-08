@@ -73,7 +73,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
       self.watsonView.center = CGPointMake(self.watsonView.center.x, (self.watsonView.center.y - self.watsonView.frame.size.height - 40 ));
     } completion:^(BOOL finished) {
       
-      [UIView animateWithDuration:1 delay:5 options:UIViewAnimationOptionTransitionNone animations:^{
+      [UIView animateWithDuration:1 delay:3 options:UIViewAnimationOptionTransitionNone animations:^{
         self.watsonView.center = CGPointMake(self.watsonView.center.x, (self.watsonView.center.y + self.watsonView.frame.size.height) + 40 );
       } completion:^(BOOL finished) {
         NSLog(@"animation done");
@@ -229,7 +229,8 @@ static NSString *dateFormat = @"MM/dd/yyyy";
       dispatch_async(dispatch_get_main_queue(), ^{
         NSLog(@"Adding Tags");
         for (int x = 0; x<=tagsArray.count - 1;x++){
-          NSString *tag = tagsArray[x];
+          //NSString *tag = tagsArray[x];
+          NSString *tag = [[tagsArray[x] lowercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""];
           [self addTagWithName:tag];
         }
         [self watsonThinkingEnded];
@@ -564,8 +565,9 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   NSValue *value = notification.userInfo[UIKeyboardFrameBeginUserInfoKey];
   CGFloat keyboardHeight = CGRectGetHeight([value CGRectValue]);
   
-  CGPoint offset = CGPointMake(0, (keyboardHeight/2)+30);
-  NSLog(@"%f",keyboardHeight);
+//  CGPoint offset = CGPointMake(0, (keyboardHeight/2)-20);
+  CGPoint offset = CGPointMake(0, 20);
+  //NSLog(@"%f",keyboardHeight);
   [self.scrollView setContentOffset:offset animated:YES];
 }
 
@@ -574,7 +576,7 @@ static NSString *dateFormat = @"MM/dd/yyyy";
   CGFloat keyboardHeight = CGRectGetHeight([value CGRectValue]);
   
   CGPoint offset = CGPointMake(0, 0);
-  NSLog(@"%f",keyboardHeight);
+  //NSLog(@"%f",keyboardHeight);
   [self.scrollView setContentOffset:offset animated:YES];
 }
 -(NSString *)convertDateToString:(NSDate *)date{

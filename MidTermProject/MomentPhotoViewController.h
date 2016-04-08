@@ -10,4 +10,5 @@
 
 @interface MomentPhotoViewController : UIViewController
 @property (nonatomic, strong) UIImage *image;
+@property (copy,nonatomic) NSString *notes;
 @end
