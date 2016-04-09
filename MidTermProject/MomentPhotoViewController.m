@@ -66,7 +66,7 @@
   }
 }
 -(void)sharePhoto:(id)sender{
-  NSString *textToShare = @"notes";
+  NSString *textToShare = self.notes;
   UIImage *myImage = self.image;
   
   NSArray *objectsToShare = @[textToShare, myImage];

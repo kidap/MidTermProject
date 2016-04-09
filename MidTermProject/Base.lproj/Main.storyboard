@@ -646,9 +646,11 @@
                                             </mask>
                                         </variation>
                                     </label>
-                                    <button opaque="NO" alpha="0.0" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fdH-QK-rTA">
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fdH-QK-rTA">
                                         <rect key="frame" x="0.0" y="642" width="32" height="30"/>
-                                        <state key="normal" title="D"/>
+                                        <state key="normal" title="D">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
                                         <connections>
                                             <action selector="deleteButton:" destination="0uW-Dz-2ez" eventType="touchUpInside" id="eNb-61-1An"/>
                                         </connections>
