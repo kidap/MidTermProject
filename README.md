@@ -1,4 +1,4 @@
-# MidTermProject
+# Trip Tracker and Tagger App using IBM Watson
 Trip Tracker and Tagger App using IBM Watson
 
 Creating a new trip. 
