@@ -11,8 +11,10 @@ Based on where the photo was taken and what's in the image, the app shows tag su
 ![alt tag](https://github.com/kidap/MidTermProject/blob/master/TripTracker_SaveMoment.gif)
 
 Photos are organized per day automatically
+
 ![alt tag](https://github.com/kidap/MidTermProject/blob/master/TripTracker_BrowseTrip.png)
 
 Search using tags
+
 ![alt tag](https://github.com/kidap/MidTermProject/blob/master/TripTracker_TagSearch.png)
 
