@@ -15,3 +15,4 @@ Photos are organized per day automatically
 
 Search using tags
 ![alt tag](https://github.com/kidap/MidTermProject/blob/master/TripTracker_TagSearch.png)
+
